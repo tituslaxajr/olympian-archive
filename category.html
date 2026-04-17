@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Archivist | Browse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error-container": "#fe8983",
+          "on-primary-fixed": "#2f4435",
+          "on-secondary-container": "#4d5356",
+          "surface-container-highest": "#dde4e3",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#adb3b2",
+          "surface-container-high": "#e4e9e8",
+          "primary-container": "#d0e9d4",
+          "primary-fixed-dim": "#c2dbc6",
+          "tertiary": "#575e78",
+          "tertiary-container": "#d5dcfb",
+          "on-tertiary-fixed": "#343b53",
+          "inverse-surface": "#0c0f0e",
+          "tertiary-fixed": "#d5dcfb",
+          "error-dim": "#4e0309",
+          "tertiary-fixed-dim": "#c7ceec",
+          "on-tertiary": "#faf8ff",
+          "secondary-fixed-dim": "#d0d5d9",
+          "secondary-fixed": "#dee3e7",
+          "surface-tint": "#4d6453",
+          "on-tertiary-fixed-variant": "#505771",
+          "secondary": "#5a6063",
+          "surface-dim": "#d4dcda",
+          "on-surface": "#2d3433",
+          "on-primary": "#e5fee8",
+          "background": "#f9f9f8",
+          "surface-bright": "#f9f9f8",
+          "on-secondary-fixed-variant": "#565c5f",
+          "on-primary-fixed-variant": "#4a6150",
+          "primary-fixed": "#d0e9d4",
+          "error": "#9f403d",
+          "primary": "#4d6453",
+          "primary-dim": "#415847",
+          "on-error": "#fff7f6",
+          "on-surface-variant": "#5a6060",
+          "secondary-container": "#dee3e7",
+          "secondary-dim": "#4e5457",
+          "on-secondary-fixed": "#3a4043",
+          "surface": "#f9f9f8",
+          "on-tertiary-container": "#474d67",
+          "on-secondary": "#f4fafd",
+          "on-background": "#2d3433",
+          "on-error-container": "#752121",
+          "surface-container-low": "#f2f4f3",
+          "surface-variant": "#dde4e3",
+          "on-primary-container": "#415747",
+          "outline": "#757c7b",
+          "tertiary-dim": "#4b526c",
+          "inverse-primary": "#e3fde7",
+          "surface-container": "#ebeeed",
+          "inverse-on-surface": "#9c9d9c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "fontFamily": {
+          "headline": ["Playfair Display", "serif"],
+          "body": ["DM Sans", "sans-serif"],
+          "label": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'DM Sans', sans-serif; }
+  h1, h2, h3, h4, .font-headline { font-family: 'Playfair Display', serif; }
+  h1 em, h2 em, h3 em { font-style: italic; font-weight: inherit; }
+
+  /* Page transitions */
+  @keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pageOut { to { opacity:0; transform:translateY(-8px); } }
+  body { animation: pageIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  body.page-exit { animation: pageOut 0.25s ease forwards !important; }
+
+  /* Scroll reveals */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* Nav underline slide */
+  .nav-link { position:relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:currentColor; transition:width 0.25s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* Card hover lift */
+  .card-hover { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease; }
+  .card-hover:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(77,100,83,0.13); }
+
+  /* Header scroll */
+  header.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+
+  /* Domain tab active */
+  .domain-tab { transition: color 0.2s, border-color 0.2s, background 0.2s; }
+  .domain-tab.active { color: #4d6453; border-bottom: 2px solid #4d6453; font-weight: 700; }
+
+  /* Filter input */
+  .filter-input:focus { border-color: #4d6453; box-shadow: 0 0 0 2px rgba(77,100,83,0.1); }
+  .filter-input { transition: border-color 0.2s, box-shadow 0.2s; }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer { from { background-position:-600px 0; } to { background-position:600px 0; } }
+  .skeleton { background:linear-gradient(90deg,#dde4e3 25%,#f2f4f3 50%,#dde4e3 75%); background-size:1200px 100%; animation:shimmer 1.5s infinite linear; border-radius:2px; min-height:1em; }
+
+  /* Card stagger-in */
+  @keyframes cardIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  .card-animate { animation: cardIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<!-- Top Navigation -->
+<header id="site-header" class="bg-[#f2f4f3]/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center w-full px-8 md:px-16 py-3 border-b border-outline-variant/10 transition-all duration-300">
+  <a href="/archive/index.html" class="font-headline text-xl font-semibold tracking-tight text-[#2d3433]">The Archivist</a>
+  <nav class="hidden md:flex items-center gap-8 text-sm">
+    <a href="/archive/index.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Home</a>
+    <a href="/archive/category.html" class="text-[#4d6453] font-bold border-b-2 border-[#4d6453] pb-0.5">Browse</a>
+    <a href="/archive/search.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Search</a>
+    <a href="/archive/graph.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Graph</a>
+    <a href="/archive/ask.html"   class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Ask</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <a href="/archive/search.html">
+      <span class="material-symbols-outlined text-[#757c7b] hover:text-primary cursor-pointer transition-colors">search</span>
+    </a>
+  </div>
+</header>
+
+<main class="flex-1 max-w-7xl mx-auto w-full px-8 md:px-16 py-12">
+
+  <!-- Page Header -->
+  <header class="mb-12 reveal">
+    <div class="flex items-center gap-2 text-[#757c7b] text-xs mb-4 tracking-widest font-medium uppercase">
+      <a href="/archive/index.html" class="hover:text-primary transition-colors">Domains</a>
+      <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+      <span id="breadcrumb-domain" class="text-primary-dim">—</span>
+    </div>
+    <h1 id="domain-title" class="text-5xl md:text-6xl font-headline text-on-surface mb-6 leading-tight">
+      <span class="skeleton inline-block w-2/3 h-16">&nbsp;</span>
+    </h1>
+    <p id="domain-desc" class="text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+      <span class="skeleton block h-5 mb-2 w-full"></span>
+      <span class="skeleton block h-5 w-4/5"></span>
+    </p>
+  </header>
+
+  <!-- Domain Tabs -->
+  <div class="flex gap-6 mb-10 border-b border-outline-variant/15 overflow-x-auto reveal" style="transition-delay:60ms">
+    <button class="domain-tab pb-3 text-sm font-medium text-[#757c7b] shrink-0" data-domain="faith">Faith</button>
+    <button class="domain-tab pb-3 text-sm font-medium text-[#757c7b] shrink-0" data-domain="ministry">Ministry</button>
+    <button class="domain-tab pb-3 text-sm font-medium text-[#757c7b] shrink-0" data-domain="work">Work</button>
+    <button class="domain-tab pb-3 text-sm font-medium text-[#757c7b] shrink-0" data-domain="culture">Culture</button>
+    <button class="domain-tab pb-3 text-sm font-medium text-[#757c7b] shrink-0" data-domain="general">General</button>
+  </div>
+
+  <!-- Filter Bar -->
+  <section class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 bg-surface-container-low p-6 reveal" style="transition-delay:80ms">
+    <div class="flex items-center gap-8">
+      <div class="flex items-center gap-2 border-b border-outline-variant/30 pb-1 focus-within:border-primary transition-colors">
+        <span class="material-symbols-outlined text-[#9c9d9c]">search</span>
+        <input id="filter-input" class="filter-input bg-transparent border-none focus:ring-0 text-sm w-48 lg:w-64 outline-none" placeholder="Filter entries…" type="text"/>
+      </div>
+      <div class="hidden sm:flex gap-4 items-center">
+        <span class="text-xs font-semibold tracking-wider text-[#9c9d9c] uppercase">Type:</span>
+        <button class="type-filter text-xs font-bold text-primary border-b border-primary active-type" data-type="all">All</button>
+        <button class="type-filter text-xs font-medium text-[#757c7b] hover:text-primary transition-colors" data-type="concept">Concepts</button>
+        <button class="type-filter text-xs font-medium text-[#757c7b] hover:text-primary transition-colors" data-type="resource">Resources</button>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-xs text-[#9c9d9c] font-label">
+      <span id="entry-count"></span>
+    </div>
+  </section>
+
+  <!-- Article Grid -->
+  <div id="article-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
+    <!-- Skeleton cards -->
+    <div class="group"><div class="skeleton aspect-[16/10] mb-4"></div><div class="skeleton h-5 w-1/3 mb-3"></div><div class="skeleton h-7 w-3/4 mb-3"></div><div class="skeleton h-4 w-full mb-1"></div><div class="skeleton h-4 w-5/6 mb-1"></div><div class="skeleton h-4 w-2/3"></div></div>
+    <div class="group"><div class="skeleton aspect-[16/10] mb-4"></div><div class="skeleton h-5 w-1/4 mb-3"></div><div class="skeleton h-7 w-2/3 mb-3"></div><div class="skeleton h-4 w-full mb-1"></div><div class="skeleton h-4 w-4/5 mb-1"></div><div class="skeleton h-4 w-3/4"></div></div>
+    <div class="group"><div class="skeleton aspect-[16/10] mb-4"></div><div class="skeleton h-5 w-1/3 mb-3"></div><div class="skeleton h-7 w-4/5 mb-3"></div><div class="skeleton h-4 w-full mb-1"></div><div class="skeleton h-4 w-3/5 mb-1"></div><div class="skeleton h-4 w-5/6"></div></div>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="w-full mt-16 py-12 px-8 md:px-16 flex flex-col md:flex-row justify-between items-center bg-[#ebeeed]/60 border-t border-[#dde4e3]/20">
+  <p class="font-sans text-xs tracking-wide text-[#5a6060]">© 2025 The Editorial Archivist · Titus Jr. Laxa</p>
+  <p class="text-xs text-[#9c9d9c] mt-3 md:mt-0 font-label">Press <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">/</kbd> to search · <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">G</kbd> for graph</p>
+</footer>
+
+<script src="data.js"></script>
+<script>
+// ── Page exit transition ──────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || a.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(() => { window.location.href = href; }, 240);
+});
+
+// ── Header scroll ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  const input = document.getElementById('filter-input');
+  if (e.target === input) return;
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); window.location.href = '/archive/search.html'; }
+  if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey) window.location.href = '/archive/graph.html';
+  if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) window.location.href = '/archive/ask.html';
+});
+
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
+function initRevealObserver() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+const DOMAIN_GRADIENTS = {
+  faith:    ['#2f4435','#4d6453'],
+  ministry: ['#1a3328','#2d6a4f'],
+  work:     ['#374151','#6b7280'],
+  culture:  ['#3a4030','#4d6453'],
+  general:  ['#5a6060','#757c7b'],
+};
+function entryVisualHTML(entry, cls='') {
+  const dom = entry?.domain || 'general';
+  const [c1,c2] = DOMAIN_GRADIENTS[dom] || DOMAIN_GRADIENTS.general;
+  const gradient = `linear-gradient(135deg,${c1} 0%,${c2} 100%)`;
+  const initial = (entry?.title||'?').charAt(0).toUpperCase();
+  if (entry?.coverImage) {
+    return `<img src="${entry.coverImage}" alt="${entry?.title||''}" class="${cls}" onerror="this.parentElement.style.background='${gradient}';this.remove();" />`;
+  }
+  return `<div class="w-full h-full flex items-center justify-center ${cls}" style="background:${gradient}"><span style="font-family:'Playfair Display',serif;font-size:5rem;color:rgba(255,255,255,0.2);font-weight:300;">${initial}</span></div>`;
+}
+
+// ── Data loader ───────────────────────────────────────────────────────────────
+async function loadWikiData() {
+  try {
+    const r = await fetch('/api/entries', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) return await r.json();
+  } catch {}
+  return window.WIKI_DATA || { entries:[], topTags:[], stats:{} };
+}
+
+// ── Domain meta ───────────────────────────────────────────────────────────────
+const DOMAIN_META = {
+  faith:    { label:'Faith',    title:'Theology & Spiritual Formation', desc:'A curated repository of reflections on the cross, sanctification, worship, and the daily practice of Christian faith. Every entry is a thread in an ongoing encounter with Scripture.' },
+  ministry: { label:'Ministry', title:'Pastoral Work & Church Planting', desc:'Reflections on preaching, counseling, youth ministry, and the Kapatid Ministry network. The long work of shepherding a people toward Christ.' },
+  work:     { label:'Work',     title:'Design, Vocation & Technology',  desc:'Thinking through design craft, AI, and what it means to work well in an accelerated world. Vocation as a form of faithful stewardship.' },
+  culture:  { label:'Culture',  title:'Media, Storytelling & Society',  desc:'Engaging film, literature, sexuality, and cultural forces through a theological lens. Reading the world to understand the times.' },
+  general:  { label:'General',  title:'General Archive',                desc:'Concepts, people, and resources that span multiple domains of thought and practice.' },
+};
+
+// ── Card HTML ─────────────────────────────────────────────────────────────────
+function cardHTML(e, idx, delay) {
+  const tag = e.tags[0] ? `<span class="bg-surface-container-high px-2 py-0.5 rounded-md text-[10px] font-bold text-on-primary-fixed-variant uppercase tracking-wider">${e.tags[0]}</span>` : '';
+  return `
+    <article class="group card-hover card-animate" style="animation-delay:${delay}ms">
+      <a href="/archive/entry.html?slug=${e.slug}">
+        <div class="relative mb-4 overflow-hidden bg-surface-container-high aspect-[16/10]">
+          ${entryVisualHTML(e, 'object-cover w-full h-full transition-transform duration-700 group-hover:scale-105 opacity-90')}
+          <div class="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent"></div>
+        </div>
+        <div class="flex gap-2 mb-3">${tag}</div>
+        <h3 class="text-2xl font-headline mb-3 group-hover:text-primary transition-colors">${e.title}</h3>
+        <p class="text-sm text-on-surface-variant line-clamp-3 leading-relaxed mb-4">${e.excerpt}</p>
+        <div class="flex items-center gap-4 text-xs font-medium text-[#9c9d9c]">
+          <span class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">schedule</span>
+            ${fmtDate(e.updated||e.created)}
+          </span>
+          ${e.sources ? `<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">hub</span>${e.sources} sources</span>` : ''}
+        </div>
+      </a>
+    </article>`;
+}
+
+function featuredPanelHTML(e) {
+  return `
+    <article class="group col-span-1 md:col-span-2 xl:col-span-3 flex flex-col md:flex-row gap-8 bg-surface-container-lowest p-8 card-hover card-animate">
+      <div class="w-full md:w-1/2 lg:w-2/5 aspect-video overflow-hidden shrink-0">
+        ${entryVisualHTML(e, 'object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-1000')}
+      </div>
+      <div class="flex-1 flex flex-col justify-center">
+        <div class="flex gap-2 mb-4">
+          <span class="bg-[#f2f4f3] text-[#5a6060] px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Featured Essay</span>
+          <span class="bg-[#d0e9d4] text-[#415747] px-3 py-1 text-[10px] font-bold uppercase tracking-widest">${cap(e.domain)}</span>
+        </div>
+        <a href="/archive/entry.html?slug=${e.slug}">
+          <h2 class="text-3xl md:text-4xl font-headline mb-6 group-hover:text-primary transition-colors leading-tight">${e.title}</h2>
+        </a>
+        <p class="text-on-surface-variant mb-8 leading-relaxed italic">${e.excerpt}</p>
+        <a href="/archive/entry.html?slug=${e.slug}" class="inline-flex items-center gap-2 text-primary font-bold text-sm hover:gap-4 transition-all duration-300">
+          Read full discourse
+          <span class="material-symbols-outlined">arrow_right_alt</span>
+        </a>
+      </div>
+    </article>`;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let allEntries = [];
+let currentDomain = 'faith';
+let currentType   = 'all';
+let filterText    = '';
+
+function renderGrid() {
+  const grid = document.getElementById('article-grid');
+  const countEl = document.getElementById('entry-count');
+  if (!grid) return;
+
+  let filtered = allEntries.filter(e => e.domain === currentDomain && e.type !== 'area');
+  if (currentType !== 'all') filtered = filtered.filter(e => e.type === currentType);
+  if (filterText) {
+    const q = filterText.toLowerCase();
+    filtered = filtered.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.excerpt.toLowerCase().includes(q) ||
+      e.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  if (countEl) countEl.textContent = `${filtered.length} entr${filtered.length === 1 ? 'y' : 'ies'}`;
+
+  if (!filtered.length) {
+    grid.innerHTML = `<p class="col-span-3 text-on-surface-variant py-20 text-center">No entries found.</p>`;
+    return;
+  }
+
+  const cards   = filtered.slice(0, 5).map((e, i) => cardHTML(e, i, i * 60)).join('');
+  const featured = filtered[0];
+  grid.innerHTML = cards + featuredPanelHTML(featured);
+}
+
+function updateHeader(domain) {
+  const meta = DOMAIN_META[domain] || DOMAIN_META.faith;
+  document.title = `The Archivist | ${meta.label}`;
+  const bc    = document.getElementById('breadcrumb-domain');
+  const title = document.getElementById('domain-title');
+  const desc  = document.getElementById('domain-desc');
+  if (bc)    bc.textContent    = meta.label;
+  if (title) title.textContent = meta.title;
+  if (desc)  desc.textContent  = meta.desc;
+}
+
+function setActiveDomain(domain) {
+  currentDomain = domain;
+  document.querySelectorAll('.domain-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.domain === domain);
+  });
+  updateHeader(domain);
+  renderGrid();
+  const url = new URL(window.location);
+  url.searchParams.set('domain', domain);
+  window.history.replaceState({}, '', url);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function() {
+  const data = await loadWikiData();
+  allEntries  = data.entries || [];
+
+  // Read domain from URL
+  const params = new URLSearchParams(window.location.search);
+  const domain = params.get('domain') || 'faith';
+  setActiveDomain(domain);
+
+  // Domain tab clicks
+  document.querySelectorAll('.domain-tab').forEach(btn => {
+    btn.addEventListener('click', () => setActiveDomain(btn.dataset.domain));
+  });
+
+  // Type filter clicks
+  document.querySelectorAll('.type-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+      currentType = this.dataset.type;
+      document.querySelectorAll('.type-filter').forEach(b => {
+        b.classList.remove('text-primary','border-b','border-primary','font-bold','active-type');
+        b.classList.add('text-[#757c7b]','font-medium');
+      });
+      this.classList.add('text-primary','border-b','border-primary','font-bold','active-type');
+      this.classList.remove('text-[#757c7b]','font-medium');
+      renderGrid();
+    });
+  });
+
+  // Filter input
+  const filterInput = document.getElementById('filter-input');
+  if (filterInput) {
+    filterInput.addEventListener('input', function() {
+      filterText = this.value.trim();
+      renderGrid();
+    });
+  }
+
+  initRevealObserver();
+})();
+</script>
+</body>
+</html>

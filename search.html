@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Archivist | Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error-container": "#fe8983",
+          "on-primary-fixed": "#2f4435",
+          "on-secondary-container": "#4d5356",
+          "surface-container-highest": "#dde4e3",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#adb3b2",
+          "surface-container-high": "#e4e9e8",
+          "primary-container": "#d0e9d4",
+          "primary-fixed-dim": "#c2dbc6",
+          "tertiary": "#575e78",
+          "tertiary-container": "#d5dcfb",
+          "on-tertiary-fixed": "#343b53",
+          "inverse-surface": "#0c0f0e",
+          "tertiary-fixed": "#d5dcfb",
+          "error-dim": "#4e0309",
+          "tertiary-fixed-dim": "#c7ceec",
+          "on-tertiary": "#faf8ff",
+          "secondary-fixed-dim": "#d0d5d9",
+          "secondary-fixed": "#dee3e7",
+          "surface-tint": "#4d6453",
+          "on-tertiary-fixed-variant": "#505771",
+          "secondary": "#5a6063",
+          "surface-dim": "#d4dcda",
+          "on-surface": "#2d3433",
+          "on-primary": "#e5fee8",
+          "background": "#f9f9f8",
+          "surface-bright": "#f9f9f8",
+          "on-secondary-fixed-variant": "#565c5f",
+          "on-primary-fixed-variant": "#4a6150",
+          "primary-fixed": "#d0e9d4",
+          "error": "#9f403d",
+          "primary": "#4d6453",
+          "primary-dim": "#415847",
+          "on-error": "#fff7f6",
+          "on-surface-variant": "#5a6060",
+          "secondary-container": "#dee3e7",
+          "secondary-dim": "#4e5457",
+          "on-secondary-fixed": "#3a4043",
+          "surface": "#f9f9f8",
+          "on-tertiary-container": "#474d67",
+          "on-secondary": "#f4fafd",
+          "on-background": "#2d3433",
+          "on-error-container": "#752121",
+          "surface-container-low": "#f2f4f3",
+          "surface-variant": "#dde4e3",
+          "on-primary-container": "#415747",
+          "outline": "#757c7b",
+          "tertiary-dim": "#4b526c",
+          "inverse-primary": "#e3fde7",
+          "surface-container": "#ebeeed",
+          "inverse-on-surface": "#9c9d9c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "fontFamily": {
+          "headline": ["Playfair Display", "serif"],
+          "body": ["DM Sans", "sans-serif"],
+          "label": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'DM Sans', sans-serif; }
+  h1, h2, h3, h4, .font-headline { font-family: 'Playfair Display', serif; }
+  h1 em, h2 em, h3 em { font-style: italic; font-weight: inherit; }
+
+  /* Page transitions */
+  @keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pageOut { to { opacity:0; transform:translateY(-8px); } }
+  body { animation: pageIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  body.page-exit { animation: pageOut 0.25s ease forwards !important; }
+
+  /* Scroll reveals */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* Nav underline slide */
+  .nav-link { position:relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:currentColor; transition:width 0.25s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* Search input focus ring */
+  #search-input:focus { box-shadow: 0 0 0 3px rgba(77,100,83,0.12), 0 32px 64px -12px rgba(0,0,0,0.04); border-color: #4d6453; }
+  #search-input { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+
+  /* Result card hover */
+  .result-card { transition: background 0.2s, transform 0.2s; }
+  .result-card:hover { transform: translateX(3px); }
+
+  /* Header scroll */
+  header.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer { from { background-position:-600px 0; } to { background-position:600px 0; } }
+  .skeleton { background:linear-gradient(90deg,#e4e9e8 25%,#f2f4f3 50%,#e4e9e8 75%); background-size:1200px 100%; animation:shimmer 1.5s infinite linear; border-radius:2px; min-height:1em; }
+
+  /* Live results fade-in */
+  @keyframes resultIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .result-animate { animation: resultIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- Top Navigation -->
+<header id="site-header" class="bg-stone-50/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center w-full px-8 md:px-16 py-3 border-b border-outline-variant/10 transition-all duration-300">
+  <a href="/archive/index.html" class="font-headline text-xl font-semibold tracking-tight text-stone-900">The Archivist</a>
+  <nav class="hidden md:flex items-center gap-8 text-sm">
+    <a href="/archive/index.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Home</a>
+    <a href="/archive/category.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Browse</a>
+    <a href="/archive/search.html" class="text-emerald-900 font-bold border-b-2 border-emerald-900 pb-0.5">Search</a>
+    <a href="/archive/graph.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Graph</a>
+    <a href="/archive/ask.html"   class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Ask</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <span class="material-symbols-outlined text-primary cursor-pointer transition-colors">search</span>
+  </div>
+</header>
+
+<main class="flex-1 min-h-screen px-8 md:px-16 py-12">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Search Header -->
+    <section class="mb-16 reveal">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div class="space-y-2">
+          <h1 class="font-headline text-5xl tracking-tight text-on-surface">Universal Search</h1>
+          <p class="text-on-surface-variant font-body">Traverse the archive with precision. Theology, ministry, design, culture — every entry, every connection.</p>
+        </div>
+        <button id="random-btn" class="group flex items-center gap-2 px-5 py-3 bg-surface-container-high text-primary font-medium border border-outline-variant/10 hover:bg-surface-container-highest transition-all duration-200 shrink-0">
+          <span class="material-symbols-outlined text-[20px]">casino</span>
+          Random Entry
+        </button>
+      </div>
+      <div class="relative w-full flex items-stretch">
+        <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-stone-400 text-3xl pointer-events-none">search</span>
+        <input
+          id="search-input"
+          class="flex-1 pl-16 pr-6 py-7 bg-surface-container-lowest border-b-2 border-outline-variant/20 focus:border-primary outline-none text-2xl font-headline placeholder:text-stone-300"
+          placeholder="Search titles, concepts, or cross-references..."
+          type="text"
+          autocomplete="off"
+        />
+        <button
+          id="search-btn"
+          class="flex items-center gap-2 px-8 py-7 bg-primary text-on-primary font-label font-semibold text-sm tracking-wide shrink-0 hover:bg-primary-dim transition-colors duration-200 border-b-2 border-primary"
+        >
+          <div id="search-spinner" class="hidden">
+            <div class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></div>
+          </div>
+          <span id="search-btn-label">Search</span>
+        </button>
+      </div>
+      <div id="search-meta" class="mt-3 text-xs text-stone-400 font-label h-4"></div>
+    </section>
+
+    <!-- Results + Sidebar Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+      <!-- Results Column -->
+      <div class="lg:col-span-8 space-y-12">
+
+        <!-- Page Titles -->
+        <div class="reveal" style="transition-delay:60ms">
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-xs font-bold tracking-[0.2em] uppercase text-stone-400">Page Titles</span>
+            <div class="h-px flex-1 bg-outline-variant/10"></div>
+            <span id="title-count" class="text-xs text-stone-400 font-label"></span>
+          </div>
+          <div id="results-titles" class="space-y-4">
+            <!-- Skeleton -->
+            <div class="skeleton h-24 w-full"></div>
+            <div class="skeleton h-24 w-full"></div>
+            <div class="skeleton h-24 w-full"></div>
+          </div>
+        </div>
+
+        <!-- Deep Content Matches -->
+        <div id="deep-section" class="reveal" style="transition-delay:120ms">
+          <div class="flex items-center gap-4 mb-8">
+            <span class="text-xs font-bold tracking-[0.2em] uppercase text-stone-400">Deep Content Matches</span>
+            <div class="h-px flex-1 bg-outline-variant/10"></div>
+          </div>
+          <div id="results-content" class="space-y-8"></div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-4 space-y-12 reveal" style="transition-delay:80ms">
+        <div class="bg-surface-container-lowest p-8 sticky top-32">
+
+          <!-- Taxonomy Cloud -->
+          <h4 class="font-headline text-xl mb-6">Taxonomies</h4>
+          <div id="taxonomy-cloud" class="flex flex-wrap gap-2">
+            <div class="skeleton h-7 w-20"></div>
+            <div class="skeleton h-7 w-28"></div>
+            <div class="skeleton h-7 w-16"></div>
+            <div class="skeleton h-7 w-24"></div>
+            <div class="skeleton h-7 w-20"></div>
+            <div class="skeleton h-7 w-16"></div>
+          </div>
+
+          <!-- Featured Visual -->
+          <div class="mt-12 space-y-4">
+            <h4 class="font-headline text-lg">Featured Visual</h4>
+            <a href="/archive/entry.html" id="featured-visual-link" class="block aspect-[4/5] bg-stone-200 overflow-hidden group">
+              <div id="featured-visual-container" class="w-full h-full"></div>
+            </a>
+            <p id="featured-visual-caption" class="text-xs text-stone-400 italic"></p>
+          </div>
+
+          <!-- Browse by Domain -->
+          <div class="mt-12 pt-8 border-t border-stone-100">
+            <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-stone-400 mb-4">Browse by Domain</h4>
+            <div class="space-y-2">
+              <a href="/archive/category.html?domain=faith" class="flex items-center justify-between text-sm text-stone-600 hover:text-primary py-1 transition-colors group">
+                <span>Faith</span>
+                <span class="material-symbols-outlined text-stone-300 group-hover:text-primary text-sm transition-colors">arrow_right_alt</span>
+              </a>
+              <a href="/archive/category.html?domain=ministry" class="flex items-center justify-between text-sm text-stone-600 hover:text-primary py-1 transition-colors group">
+                <span>Ministry</span>
+                <span class="material-symbols-outlined text-stone-300 group-hover:text-primary text-sm transition-colors">arrow_right_alt</span>
+              </a>
+              <a href="/archive/category.html?domain=work" class="flex items-center justify-between text-sm text-stone-600 hover:text-primary py-1 transition-colors group">
+                <span>Work</span>
+                <span class="material-symbols-outlined text-stone-300 group-hover:text-primary text-sm transition-colors">arrow_right_alt</span>
+              </a>
+              <a href="/archive/category.html?domain=culture" class="flex items-center justify-between text-sm text-stone-600 hover:text-primary py-1 transition-colors group">
+                <span>Culture</span>
+                <span class="material-symbols-outlined text-stone-300 group-hover:text-primary text-sm transition-colors">arrow_right_alt</span>
+              </a>
+              <a href="/archive/graph.html" class="flex items-center justify-between text-sm text-stone-600 hover:text-primary py-1 transition-colors group">
+                <span>Knowledge Graph</span>
+                <span class="material-symbols-outlined text-stone-300 group-hover:text-primary text-sm transition-colors">arrow_right_alt</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="w-full mt-auto py-12 px-8 md:px-16 flex flex-col md:flex-row justify-between items-center bg-stone-200/50 border-t border-stone-200/20">
+  <p class="font-sans text-xs tracking-wide text-stone-600">© 2025 The Editorial Archivist · Titus Jr. Laxa</p>
+  <p class="text-xs text-stone-400 mt-3 md:mt-0 font-label">Press <kbd class="px-1.5 py-0.5 bg-stone-100 rounded text-stone-500 font-mono text-[10px]">Esc</kbd> to clear · <kbd class="px-1.5 py-0.5 bg-stone-100 rounded text-stone-500 font-mono text-[10px]">G</kbd> for graph</p>
+</footer>
+
+<script src="data.js"></script>
+<script>
+// ── Page exit transition ──────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || a.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(() => { window.location.href = href; }, 240);
+});
+
+// ── Header scroll ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  const input = document.getElementById('search-input');
+  if (e.key === 'Escape') { if (input) { input.value = ''; renderResults(''); input.focus(); } return; }
+  if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement !== input) window.location.href = '/archive/graph.html';
+  if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement !== input) window.location.href = '/archive/ask.html';
+});
+
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
+function initRevealObserver() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+const DOMAIN_GRADIENTS = {
+  faith:    ['#3d5240','#4d6453'],
+  ministry: ['#1a4731','#2d6a4f'],
+  work:     ['#374151','#6b7280'],
+  culture:  ['#4a3728','#7c6d5a'],
+  general:  ['#4b5563','#9ca3af'],
+};
+function entryVisualHTML(entry, cls='') {
+  const dom = entry?.domain || 'general';
+  const [c1,c2] = DOMAIN_GRADIENTS[dom] || DOMAIN_GRADIENTS.general;
+  const gradient = `linear-gradient(135deg,${c1} 0%,${c2} 100%)`;
+  const initial = (entry?.title||'?').charAt(0).toUpperCase();
+  if (entry?.coverImage) {
+    return `<img src="${entry.coverImage}" alt="${entry?.title||''}" class="${cls}" onerror="this.parentElement.style.background='${gradient}';this.remove();" />`;
+  }
+  return `<div class="w-full h-full flex items-center justify-center ${cls}" style="background:${gradient}"><span style="font-family:'Playfair Display',serif;font-size:5rem;color:rgba(255,255,255,0.2);font-weight:300;">${initial}</span></div>`;
+}
+function highlight(text, q) {
+  if (!q) return text;
+  const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return text.replace(new RegExp(`(${esc})`, 'gi'), '<mark class="bg-primary-container text-on-primary-container px-0.5 rounded-sm">$1</mark>');
+}
+
+// ── Data loader ───────────────────────────────────────────────────────────────
+async function loadWikiData() {
+  try {
+    const r = await fetch('/api/entries', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) return await r.json();
+  } catch {}
+  return window.WIKI_DATA || { entries:[], topTags:[], stats:{} };
+}
+
+// ── Debounce ──────────────────────────────────────────────────────────────────
+function debounce(fn, ms) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+// ── Result HTML ───────────────────────────────────────────────────────────────
+function titleCardHTML(e, q, delay) {
+  const titleHL   = highlight(e.title, q);
+  const excerptHL = highlight(e.excerpt.slice(0, 180), q);
+  const tags      = e.tags.slice(0, 3).map(t =>
+    `<span class="px-2 py-0.5 bg-surface-container-high text-[10px] font-label uppercase tracking-wide text-on-surface-variant">${cap(t)}</span>`
+  ).join('');
+  return `
+    <a href="/archive/entry.html?slug=${e.slug}" class="result-card result-animate group flex items-start gap-5 p-6 bg-surface-container-lowest hover:bg-surface-container-low" style="animation-delay:${delay}ms">
+      <div class="w-14 h-14 shrink-0 overflow-hidden">
+        ${entryVisualHTML(e, 'w-full h-full object-cover')}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-headline text-2xl text-on-surface group-hover:text-primary transition-colors">${titleHL}</h3>
+          <span class="text-xs font-label text-stone-400 shrink-0 ml-4 pt-1">${fmtDate(e.updated||e.created)}</span>
+        </div>
+        <p class="text-on-surface-variant text-sm line-clamp-2 leading-relaxed mb-3">${excerptHL}...</p>
+        <div class="flex gap-2">${tags}</div>
+      </div>
+    </a>`;
+}
+
+function contentMatchHTML(e, q, delay) {
+  const snippet = e.excerpt.length > 200 ? e.excerpt.slice(0, 200) + '...' : e.excerpt;
+  return `
+    <a href="/archive/entry.html?slug=${e.slug}" class="result-animate block pl-6 border-l-2 border-surface-container-high hover:border-primary transition-colors group" style="animation-delay:${delay}ms">
+      <h4 class="text-xs font-bold text-primary mb-3">Found in: ${e.title}</h4>
+      <p class="text-on-surface italic leading-loose text-sm">"...${highlight(snippet, q)}..."</p>
+    </a>`;
+}
+
+// ── Live deep search via API ──────────────────────────────────────────────────
+let currentQ = '';
+async function deepSearch(q) {
+  if (!q || q.length < 2) return [];
+  try {
+    const r = await fetch(`/api/content-search?q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) { const d = await r.json(); return d.results || []; }
+  } catch {}
+  return [];
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+let allEntries = [];
+
+async function renderResults(q) {
+  currentQ = q;
+  const titlesEl  = document.getElementById('results-titles');
+  const contentEl = document.getElementById('results-content');
+  const countEl   = document.getElementById('title-count');
+  const metaEl    = document.getElementById('search-meta');
+  const spinner   = document.getElementById('search-spinner');
+
+  if (!q || q.length < 2) {
+    const latest = allEntries.slice(0, 5);
+    if (titlesEl) titlesEl.innerHTML = latest.map((e, i) => titleCardHTML(e, '', i * 40)).join('');
+    if (contentEl) contentEl.innerHTML = '';
+    if (countEl) countEl.textContent = '';
+    if (metaEl) metaEl.textContent = allEntries.length ? `${allEntries.length} entries in the archive` : '';
+    return;
+  }
+
+  const ql = q.toLowerCase();
+
+  // Title matches (instant, from loaded data)
+  const titleMatches = allEntries.filter(e =>
+    e.title.toLowerCase().includes(ql) || e.tags.some(t => t.toLowerCase().includes(ql))
+  );
+
+  if (titlesEl) {
+    titlesEl.innerHTML = titleMatches.length
+      ? titleMatches.slice(0, 8).map((e, i) => titleCardHTML(e, q, i * 35)).join('')
+      : `<p class="text-on-surface-variant py-8 text-center text-sm">No title matches for "<em>${q}</em>".</p>`;
+  }
+  if (countEl) countEl.textContent = titleMatches.length ? `${titleMatches.length} results` : '';
+
+  // Deep content search (async, from API)
+  if (spinner) spinner.classList.remove('hidden');
+  const deepResults = await deepSearch(q);
+  if (spinner) spinner.classList.add('hidden');
+
+  if (q !== currentQ) return; // stale response
+
+  // Convert API path results to entry objects
+  const contentMatches = deepResults
+    .map(r => {
+      const slug = r.path.replace(/^.*[/\\]/,'').replace(/\.md$/,'');
+      const entry = allEntries.find(e => e.slug === slug);
+      return entry ? { entry, snippet: r.snippet } : null;
+    })
+    .filter(Boolean)
+    .filter(({ entry }) => !titleMatches.some(m => m.slug === entry.slug))
+    .slice(0, 5);
+
+  if (contentEl) {
+    contentEl.innerHTML = contentMatches.length
+      ? contentMatches.map(({ entry, snippet }, i) => `
+          <a href="/archive/entry.html?slug=${entry.slug}" class="result-animate block pl-6 border-l-2 border-surface-container-high hover:border-primary transition-colors group" style="animation-delay:${i*40}ms">
+            <h4 class="text-xs font-bold text-primary mb-3">Found in: ${entry.title}</h4>
+            <p class="text-on-surface italic leading-loose text-sm">"...${highlight(snippet, q)}..."</p>
+          </a>`).join('')
+      : '';
+  }
+
+  if (metaEl) metaEl.textContent = `${titleMatches.length} title · ${contentMatches.length} content matches`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function() {
+  const data = await loadWikiData();
+  allEntries = data.entries || [];
+  const topTags = data.topTags || [];
+
+  // Taxonomy cloud
+  const taxEl = document.getElementById('taxonomy-cloud');
+  if (taxEl && topTags.length) {
+    taxEl.innerHTML = topTags.slice(0, 16).map((t, i) => {
+      const cls = i === 0
+        ? 'px-3 py-1.5 bg-primary-container rounded-md text-xs font-label text-on-primary-container cursor-pointer'
+        : 'px-3 py-1.5 bg-surface-container-high rounded-md text-xs font-label text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container cursor-pointer transition-colors';
+      return `<a href="?q=${encodeURIComponent(t)}" class="${cls}">${cap(t)}</a>`;
+    }).join('');
+  }
+
+  // Featured visual
+  const featured = allEntries.find(e => (e.tags||[]).includes('featured')) || allEntries[0];
+  const captionEl = document.getElementById('featured-visual-caption');
+  const featLinkEl = document.getElementById('featured-visual-link');
+  const featVisEl  = document.getElementById('featured-visual-container');
+  if (featured) {
+    if (captionEl)  captionEl.textContent = `${featured.title} — ${fmtDate(featured.created)}`;
+    if (featLinkEl) featLinkEl.href = `/archive/entry.html?slug=${featured.slug}`;
+    if (featVisEl)  featVisEl.innerHTML = entryVisualHTML(featured, 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-700');
+  }
+
+  // Random entry button
+  const randomBtn = document.getElementById('random-btn');
+  if (randomBtn && allEntries.length) {
+    randomBtn.addEventListener('click', function() {
+      const r = allEntries[Math.floor(Math.random() * allEntries.length)];
+      window.location.href = `/archive/entry.html?slug=${r.slug}`;
+    });
+  }
+
+  // Search input
+  const input = document.getElementById('search-input');
+  const searchBtn = document.getElementById('search-btn');
+  const params = new URLSearchParams(window.location.search);
+  const initialQ = params.get('q') || '';
+  if (input && initialQ) input.value = initialQ;
+  renderResults(initialQ);
+
+  function triggerSearch() {
+    const q = input.value.trim();
+    renderResults(q);
+    const url = new URL(window.location);
+    q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+    window.history.replaceState({}, '', url);
+  }
+
+  if (input) {
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') triggerSearch();
+    });
+    input.focus();
+  }
+
+  if (searchBtn) {
+    searchBtn.addEventListener('click', triggerSearch);
+  }
+
+  initRevealObserver();
+})();
+</script>
+</body>
+</html>

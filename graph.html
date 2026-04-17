@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Archivist | Knowledge Graph</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="data.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#adb3b2",
+          "surface-container-high": "#e4e9e8",
+          "primary-container": "#d0e9d4",
+          "surface-tint": "#4d6453",
+          "on-surface": "#2d3433",
+          "background": "#f9f9f8",
+          "primary": "#4d6453",
+          "primary-dim": "#415847",
+          "on-surface-variant": "#5a6060",
+          "surface": "#f9f9f8",
+          "surface-container-low": "#f2f4f3",
+          "on-primary-container": "#415747",
+          "surface-container": "#ebeeed"
+        },
+        "fontFamily": {
+          "headline": ["Cormorant Garamond", "serif"],
+          "body": ["DM Sans", "sans-serif"],
+          "label": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'DM Sans', sans-serif; background: #f9f9f8; }
+  h1, h2, h3, .font-headline { font-family: 'Cormorant Garamond', serif; }
+
+  /* Page transitions */
+  @keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pageOut { to { opacity:0; transform:translateY(-8px); } }
+  body { animation: pageIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  body.page-exit { animation: pageOut 0.25s ease forwards !important; }
+
+  /* Nav underline slide */
+  .nav-link { position:relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:currentColor; transition:width 0.25s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* Graph canvas */
+  #graph-svg { width:100%; height:100%; cursor:grab; }
+  #graph-svg:active { cursor:grabbing; }
+
+  /* Node labels */
+  .node-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; fill: #2d3433; pointer-events: none; user-select: none; }
+
+  /* Links */
+  .graph-link { stroke: #dde4e3; stroke-width: 1px; transition: stroke 0.2s, stroke-width 0.2s; }
+  .graph-link.highlighted { stroke: #4d6453; stroke-width: 2px; }
+  .graph-link.dimmed { stroke: #f0f0f0; }
+
+  /* Nodes */
+  .graph-node { cursor: pointer; transition: opacity 0.2s; }
+  .graph-node circle { transition: r 0.3s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s; }
+  .graph-node:hover circle { filter: brightness(0.85); }
+  .graph-node.dimmed { opacity: 0.15; }
+
+  /* Tooltip */
+  #graph-tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid #e4e9e8;
+    backdrop-filter: blur(8px);
+    padding: 12px 16px;
+    border-radius: 2px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 240px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  #graph-tooltip.visible { opacity: 1; transform: translateY(0); }
+
+  /* Controls */
+  .graph-btn { transition: background 0.15s, color 0.15s; }
+  .graph-btn:hover { background: #e4e9e8; }
+  .graph-btn.active { background: #4d6453; color: white; }
+
+  /* Loading spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { animation: spin 0.8s linear infinite; }
+
+  /* Header scroll */
+  header.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+</style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col">
+
+<!-- Top Navigation -->
+<header id="site-header" class="bg-stone-50/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center w-full px-8 md:px-16 py-3 border-b border-outline-variant/10 transition-all duration-300">
+  <a href="/archive/index.html" class="font-headline text-xl font-semibold tracking-tight text-stone-900">The Archivist</a>
+  <nav class="hidden md:flex items-center gap-8 text-sm">
+    <a href="/archive/index.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Home</a>
+    <a href="/archive/category.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Browse</a>
+    <a href="/archive/search.html" class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Search</a>
+    <a href="/archive/graph.html" class="text-emerald-900 font-bold border-b-2 border-emerald-900 pb-0.5">Graph</a>
+    <a href="/archive/ask.html"   class="nav-link text-stone-500 font-medium hover:text-emerald-800 transition-colors duration-200">Ask</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <a href="/archive/search.html">
+      <span class="material-symbols-outlined text-stone-500 hover:text-primary cursor-pointer transition-colors">search</span>
+    </a>
+  </div>
+</header>
+
+<!-- Graph Controls Bar -->
+<div class="bg-surface-container-lowest border-b border-outline-variant/10 px-8 md:px-16 py-3 flex flex-wrap items-center gap-4 z-40">
+  <!-- Search filter -->
+  <div class="flex items-center gap-2 border border-outline-variant/30 px-3 py-1.5 bg-white">
+    <span class="material-symbols-outlined text-stone-400 text-sm">search</span>
+    <input id="graph-search" class="text-sm outline-none bg-transparent w-40 placeholder:text-stone-300 font-label" placeholder="Filter nodes…" type="text" autocomplete="off"/>
+  </div>
+
+  <!-- Domain filters -->
+  <div class="flex items-center gap-1">
+    <button class="domain-filter graph-btn px-3 py-1.5 text-xs font-label rounded-sm active" data-domain="all">All</button>
+    <button class="domain-filter graph-btn px-3 py-1.5 text-xs font-label rounded-sm text-stone-500" data-domain="faith">Faith</button>
+    <button class="domain-filter graph-btn px-3 py-1.5 text-xs font-label rounded-sm text-stone-500" data-domain="ministry">Ministry</button>
+    <button class="domain-filter graph-btn px-3 py-1.5 text-xs font-label rounded-sm text-stone-500" data-domain="work">Work</button>
+    <button class="domain-filter graph-btn px-3 py-1.5 text-xs font-label rounded-sm text-stone-500" data-domain="culture">Culture</button>
+  </div>
+
+  <div class="h-4 w-px bg-stone-200 hidden sm:block"></div>
+
+  <!-- Zoom controls -->
+  <div class="flex items-center gap-1">
+    <button id="zoom-in" class="graph-btn w-8 h-8 flex items-center justify-center rounded-sm text-stone-600 font-bold text-lg">+</button>
+    <button id="zoom-out" class="graph-btn w-8 h-8 flex items-center justify-center rounded-sm text-stone-600 font-bold text-lg">−</button>
+    <button id="zoom-reset" class="graph-btn px-2 h-8 flex items-center justify-center rounded-sm text-xs text-stone-500 font-label">Reset</button>
+  </div>
+
+  <div class="ml-auto flex items-center gap-3 text-xs text-stone-400 font-label">
+    <span id="graph-stats"></span>
+    <span class="hidden sm:inline">· Click node to open · Scroll to zoom · Drag to pan</span>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="absolute top-28 right-8 z-30 bg-white/90 backdrop-blur border border-outline-variant/15 p-4 rounded-sm shadow-sm hidden md:block" id="graph-legend">
+  <p class="text-xs font-bold tracking-widest uppercase text-stone-400 mb-3">Domain</p>
+  <div class="space-y-2">
+    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#4d6453]"></div><span class="text-xs text-stone-600 font-label">Faith</span></div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#2d6a4f]"></div><span class="text-xs text-stone-600 font-label">Ministry</span></div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#6b7280]"></div><span class="text-xs text-stone-600 font-label">Work</span></div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#7c6d5a]"></div><span class="text-xs text-stone-600 font-label">Culture</span></div>
+    <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#9ca3af]"></div><span class="text-xs text-stone-600 font-label">General</span></div>
+  </div>
+  <p class="text-[10px] text-stone-300 mt-3">Node size = link count</p>
+</div>
+
+<!-- Graph Canvas -->
+<div class="flex-1 relative overflow-hidden" id="graph-container" style="min-height:calc(100vh - 120px)">
+  <!-- Loading state -->
+  <div id="graph-loading" class="absolute inset-0 flex flex-col items-center justify-center gap-4">
+    <div class="w-10 h-10 rounded-full border-2 border-stone-200 border-t-primary spinner"></div>
+    <p class="text-sm text-stone-400 font-label">Building knowledge graph…</p>
+  </div>
+  <svg id="graph-svg"></svg>
+</div>
+
+<!-- Tooltip -->
+<div id="graph-tooltip">
+  <p id="tooltip-title" class="font-headline text-base text-on-surface mb-1"></p>
+  <p id="tooltip-meta" class="text-xs text-stone-400 font-label mb-2"></p>
+  <p id="tooltip-hint" class="text-xs text-primary font-label">Click to open entry →</p>
+</div>
+
+<!-- Footer -->
+<footer class="w-full py-6 px-8 md:px-16 flex flex-col md:flex-row justify-between items-center bg-stone-200/50 border-t border-stone-200/20">
+  <p class="font-sans text-xs tracking-wide text-stone-600">© 2025 The Editorial Archivist · Titus Jr. Laxa</p>
+  <p class="text-xs text-stone-400 mt-2 md:mt-0 font-label">Press <kbd class="px-1.5 py-0.5 bg-stone-100 rounded text-stone-500 font-mono text-[10px]">/</kbd> to search · Double-click a node to focus</p>
+</footer>
+
+<script>
+// ── Page exit transition ──────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || a.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(() => { window.location.href = href; }, 240);
+});
+
+// ── Header scroll ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  const input = document.getElementById('graph-search');
+  if (e.target === input) return;
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); window.location.href = '/archive/search.html'; }
+  if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) window.location.href = '/archive/ask.html';
+});
+
+// ── Domain colors ─────────────────────────────────────────────────────────────
+const DOMAIN_COLOR = {
+  faith:    '#4d6453',
+  ministry: '#2d6a4f',
+  work:     '#6b7280',
+  culture:  '#7c6d5a',
+  general:  '#9ca3af',
+  unknown:  '#c4c9c8',
+};
+
+function domainColor(d) { return DOMAIN_COLOR[d] || DOMAIN_COLOR.unknown; }
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// ── Graph state ───────────────────────────────────────────────────────────────
+let simulation, svgSel, zoomBehavior;
+let allNodes = [], allLinks = [];
+let activeDomain = 'all';
+let searchQuery  = '';
+let focusedNode  = null;
+
+// ── Load data ─────────────────────────────────────────────────────────────────
+async function loadGraphData() {
+  // Try live API graph endpoint first
+  try {
+    const r = await fetch('/api/graph', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) return await r.json();
+  } catch {}
+
+  // Fallback: build from live entries API
+  try {
+    const r2 = await fetch('/api/entries', { signal: AbortSignal.timeout(2000) });
+    if (r2.ok) {
+      const { entries } = await r2.json();
+      const nodes = entries.map(e => ({ id: e.slug, base: e.slug, label: e.title, type: e.type, domain: e.domain, path: e.slug }));
+      return { nodes, links: [] };
+    }
+  } catch {}
+
+  // Fallback: use pre-built data.js (works fully offline)
+  if (window.WIKI_DATA && window.WIKI_DATA.entries && window.WIKI_DATA.entries.length) {
+    const { entries } = window.WIKI_DATA;
+    const slugSet = new Set(entries.map(e => e.slug));
+    const nodes = entries.map(e => ({
+      id: e.slug, base: e.slug, label: e.title,
+      type: e.type, domain: e.domain, path: e.slug
+    }));
+    // Build links by finding cross-references in pre-rendered HTML
+    const seen = new Set();
+    const links = [];
+    for (const e of entries) {
+      const re = /href="entry\.html\?slug=([^"&]+)"/g;
+      let m;
+      while ((m = re.exec(e.htmlContent || '')) !== null) {
+        const targetSlug = m[1];
+        if (slugSet.has(targetSlug) && targetSlug !== e.slug) {
+          const key = [e.slug, targetSlug].sort().join('||');
+          if (!seen.has(key)) { seen.add(key); links.push({ source: e.slug, target: targetSlug }); }
+        }
+      }
+    }
+    return { nodes, links };
+  }
+
+  return { nodes: [], links: [] };
+}
+
+// ── Build graph ───────────────────────────────────────────────────────────────
+function buildGraph(rawNodes, rawLinks) {
+  const container = document.getElementById('graph-container');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+
+  // Count inbound links per node
+  const inbound = {};
+  rawLinks.forEach(l => { inbound[l.target] = (inbound[l.target]||0)+1; });
+
+  // Assign radius by inbound count
+  rawNodes.forEach(n => {
+    n._r = Math.min(18, 5 + (inbound[n.id]||0) * 1.5);
+  });
+
+  const svg = d3.select('#graph-svg')
+    .attr('width', W)
+    .attr('height', H);
+
+  svg.selectAll('*').remove();
+
+  // Defs: arrow marker
+  svg.append('defs').append('marker')
+    .attr('id','arrow').attr('viewBox','0 -3 6 6').attr('refX',10).attr('refY',0)
+    .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+    .append('path').attr('d','M0,-3L6,0L0,3').attr('fill','#dde4e3');
+
+  // Zoom group
+  const g = svg.append('g').attr('class','graph-g');
+
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.2, 4])
+    .on('zoom', e => g.attr('transform', e.transform));
+  svg.call(zoomBehavior);
+
+  // Initial transform — center
+  svg.call(zoomBehavior.transform, d3.zoomIdentity.translate(W/2, H/2).scale(0.7));
+
+  // Links
+  const link = g.append('g').attr('class','links')
+    .selectAll('line')
+    .data(rawLinks)
+    .join('line')
+    .attr('class','graph-link');
+
+  // Nodes group
+  const node = g.append('g').attr('class','nodes')
+    .selectAll('g')
+    .data(rawNodes)
+    .join('g')
+    .attr('class','graph-node')
+    .call(d3.drag()
+      .on('start', (e,d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (e,d) => { d.fx=e.x; d.fy=e.y; })
+      .on('end',   (e,d) => { if (!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; })
+    );
+
+  // Node circles
+  node.append('circle')
+    .attr('r', d => d._r)
+    .attr('fill', d => domainColor(d.domain))
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1.5)
+    .attr('fill-opacity', 0.9);
+
+  // Node labels (only show for larger nodes by default)
+  node.append('text')
+    .attr('class','node-label')
+    .attr('text-anchor','middle')
+    .attr('dy', d => d._r + 13)
+    .text(d => d.label && d.label.length > 22 ? d.label.slice(0,20)+'…' : (d.label||d.base))
+    .style('opacity', d => d._r >= 8 ? 1 : 0);
+
+  // Tooltip interactions
+  const tooltip = document.getElementById('graph-tooltip');
+  node
+    .on('mouseenter', (e, d) => {
+      document.getElementById('tooltip-title').textContent = d.label || d.base;
+      document.getElementById('tooltip-meta').textContent  = `${cap(d.domain)} · ${cap(d.type||'entry')} · ${inbound[d.id]||0} links`;
+      tooltip.classList.add('visible');
+    })
+    .on('mousemove', e => {
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 12) + 'px';
+    })
+    .on('mouseleave', () => tooltip.classList.remove('visible'))
+    .on('click', (e, d) => {
+      e.stopPropagation();
+      const slug = d.base || d.id.replace(/^.*[/\\]/,'').replace(/\.md$/,'');
+      window.location.href = `/archive/entry.html?slug=${slug}`;
+    })
+    .on('dblclick', (e, d) => {
+      e.stopPropagation();
+      focusNode(d, rawLinks, node, link);
+    });
+
+  svg.on('click', () => clearFocus(node, link));
+
+  // Force simulation
+  simulation = d3.forceSimulation(rawNodes)
+    .force('link',   d3.forceLink(rawLinks).id(d=>d.id).distance(80).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(-180).distanceMax(400))
+    .force('center', d3.forceCenter(0, 0))
+    .force('collide', d3.forceCollide(d => d._r + 10))
+    .on('tick', () => {
+      link
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+  svgSel = svg;
+  allNodes = rawNodes;
+  allLinks = rawLinks;
+
+  document.getElementById('graph-stats').textContent = `${rawNodes.length} nodes · ${rawLinks.length} links`;
+  document.getElementById('graph-loading').style.display = 'none';
+
+  return { node, link };
+}
+
+// ── Focus / dim ───────────────────────────────────────────────────────────────
+function focusNode(d, links, nodesSel, linksSel) {
+  focusedNode = d;
+  const connected = new Set([d.id]);
+  links.forEach(l => {
+    const src = typeof l.source === 'object' ? l.source.id : l.source;
+    const tgt = typeof l.target === 'object' ? l.target.id : l.target;
+    if (src === d.id) connected.add(tgt);
+    if (tgt === d.id) connected.add(src);
+  });
+  nodesSel.classed('dimmed', n => !connected.has(n.id));
+  linksSel.classed('highlighted', l => {
+    const src = typeof l.source === 'object' ? l.source.id : l.source;
+    const tgt = typeof l.target === 'object' ? l.target.id : l.target;
+    return src === d.id || tgt === d.id;
+  }).classed('dimmed', l => {
+    const src = typeof l.source === 'object' ? l.source.id : l.source;
+    const tgt = typeof l.target === 'object' ? l.target.id : l.target;
+    return src !== d.id && tgt !== d.id;
+  });
+}
+
+function clearFocus(nodesSel, linksSel) {
+  focusedNode = null;
+  nodesSel.classed('dimmed', false);
+  linksSel.classed('highlighted', false).classed('dimmed', false);
+}
+
+// ── Filter by domain / search ─────────────────────────────────────────────────
+function applyFilters(nodesSel, linksSel) {
+  const q = searchQuery.toLowerCase();
+  nodesSel.style('display', d => {
+    const domainOk = activeDomain === 'all' || d.domain === activeDomain;
+    const searchOk = !q || (d.label||d.base||'').toLowerCase().includes(q);
+    return domainOk && searchOk ? null : 'none';
+  });
+  linksSel.style('display', l => {
+    const src = typeof l.source === 'object' ? l.source : { domain:'', label:'' };
+    const tgt = typeof l.target === 'object' ? l.target : { domain:'', label:'' };
+    const srcOk = (activeDomain==='all'||src.domain===activeDomain) && (!searchQuery||(src.label||'').toLowerCase().includes(searchQuery));
+    const tgtOk = (activeDomain==='all'||tgt.domain===activeDomain) && (!searchQuery||(tgt.label||'').toLowerCase().includes(searchQuery));
+    return srcOk && tgtOk ? null : 'none';
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function() {
+  const { nodes, links } = await loadGraphData();
+
+  if (!nodes.length) {
+    document.getElementById('graph-loading').innerHTML = `
+      <span class="material-symbols-outlined text-stone-300 text-5xl">hub</span>
+      <p class="text-sm text-stone-400 font-label mt-2">No graph data available.<br>Start the wiki server to load the graph.</p>`;
+    return;
+  }
+
+  const { node: nodesSel, link: linksSel } = buildGraph(nodes, links);
+
+  // Domain filter buttons
+  document.querySelectorAll('.domain-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+      activeDomain = this.dataset.domain;
+      document.querySelectorAll('.domain-filter').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      clearFocus(nodesSel, linksSel);
+      applyFilters(nodesSel, linksSel);
+    });
+  });
+
+  // Graph search
+  const graphSearch = document.getElementById('graph-search');
+  if (graphSearch) {
+    graphSearch.addEventListener('input', function() {
+      searchQuery = this.value.trim();
+      clearFocus(nodesSel, linksSel);
+      applyFilters(nodesSel, linksSel);
+      // Highlight matching nodes
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        nodesSel.select('circle').attr('stroke', d =>
+          (d.label||d.base||'').toLowerCase().includes(q) ? '#4d6453' : '#fff'
+        ).attr('stroke-width', d =>
+          (d.label||d.base||'').toLowerCase().includes(q) ? 3 : 1.5
+        );
+      } else {
+        nodesSel.select('circle').attr('stroke','#fff').attr('stroke-width',1.5);
+      }
+    });
+  }
+
+  // Zoom controls
+  document.getElementById('zoom-in').addEventListener('click', () =>
+    svgSel.transition().duration(300).call(zoomBehavior.scaleBy, 1.4));
+  document.getElementById('zoom-out').addEventListener('click', () =>
+    svgSel.transition().duration(300).call(zoomBehavior.scaleBy, 0.7));
+  document.getElementById('zoom-reset').addEventListener('click', () => {
+    const W = document.getElementById('graph-container').clientWidth;
+    const H = document.getElementById('graph-container').clientHeight;
+    svgSel.transition().duration(500).call(zoomBehavior.transform,
+      d3.zoomIdentity.translate(W/2, H/2).scale(0.7));
+  });
+
+  // Resize handling
+  window.addEventListener('resize', () => {
+    const el = document.getElementById('graph-svg');
+    const c  = document.getElementById('graph-container');
+    d3.select(el).attr('width', c.clientWidth).attr('height', c.clientHeight);
+    if (simulation) simulation.force('center', d3.forceCenter(0, 0)).alpha(0.1).restart();
+  });
+})();
+</script>
+</body>
+</html>

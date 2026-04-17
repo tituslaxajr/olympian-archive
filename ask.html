@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Archivist | Ask</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error-container": "#fe8983",
+          "on-primary-fixed": "#2f4435",
+          "on-secondary-container": "#4d5356",
+          "surface-container-highest": "#dde4e3",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#adb3b2",
+          "surface-container-high": "#e4e9e8",
+          "primary-container": "#d0e9d4",
+          "primary-fixed-dim": "#c2dbc6",
+          "tertiary": "#575e78",
+          "tertiary-container": "#d5dcfb",
+          "on-tertiary-fixed": "#343b53",
+          "inverse-surface": "#0c0f0e",
+          "tertiary-fixed": "#d5dcfb",
+          "error-dim": "#4e0309",
+          "tertiary-fixed-dim": "#c7ceec",
+          "on-tertiary": "#faf8ff",
+          "secondary-fixed-dim": "#d0d5d9",
+          "secondary-fixed": "#dee3e7",
+          "surface-tint": "#4d6453",
+          "on-tertiary-fixed-variant": "#505771",
+          "secondary": "#5a6063",
+          "surface-dim": "#d4dcda",
+          "on-surface": "#2d3433",
+          "on-primary": "#e5fee8",
+          "background": "#f9f9f8",
+          "surface-bright": "#f9f9f8",
+          "on-secondary-fixed-variant": "#565c5f",
+          "on-primary-fixed-variant": "#4a6150",
+          "primary-fixed": "#d0e9d4",
+          "error": "#9f403d",
+          "primary": "#4d6453",
+          "primary-dim": "#415847",
+          "on-error": "#fff7f6",
+          "on-surface-variant": "#5a6060",
+          "secondary-container": "#dee3e7",
+          "secondary-dim": "#4e5457",
+          "on-secondary-fixed": "#3a4043",
+          "surface": "#f9f9f8",
+          "on-tertiary-container": "#474d67",
+          "on-secondary": "#f4fafd",
+          "on-background": "#2d3433",
+          "on-error-container": "#752121",
+          "surface-container-low": "#f2f4f3",
+          "surface-variant": "#dde4e3",
+          "on-primary-container": "#415747",
+          "outline": "#757c7b",
+          "tertiary-dim": "#4b526c",
+          "inverse-primary": "#e3fde7",
+          "surface-container": "#ebeeed",
+          "inverse-on-surface": "#9c9d9c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "fontFamily": {
+          "headline": ["Playfair Display", "serif"],
+          "body": ["DM Sans", "sans-serif"],
+          "label": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'DM Sans', sans-serif; }
+  h1, h2, h3, h4, .font-headline { font-family: 'Playfair Display', serif; }
+  h1 em, h2 em, h3 em { font-style: italic; font-weight: inherit; }
+
+  @keyframes pageIn  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pageOut { to   { opacity: 0; transform: translateY(-8px); } }
+  body { animation: pageIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  body.page-exit { animation: pageOut 0.25s ease forwards !important; }
+
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:currentColor; transition:width 0.25s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  header.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); border-color: rgba(173,179,178,0.25); }
+
+  /* ── Question input ── */
+  #question-input {
+    width: 100%;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid #adb3b2;
+    outline: none;
+    padding: 14px 0 12px;
+    color: #2d3433;
+    resize: none;
+    transition: border-color 0.2s;
+  }
+  #question-input:focus { border-bottom: 2px solid #4d6453; }
+  #question-input::placeholder { color: #9c9d9c; font-style: italic; }
+
+  /* ── Answer prose ── */
+  .answer-prose { color: #2d3433; line-height: 1.85; font-size: 1rem; }
+  .answer-prose p  { margin-bottom: 1em; }
+  .answer-prose p:last-child { margin-bottom: 0; }
+  .answer-prose h1,.answer-prose h2,.answer-prose h3 { font-family:'Playfair Display',serif; color:#4d6453; margin:1.4em 0 0.5em; font-weight:700; }
+  .answer-prose h1 { font-size:1.5rem; } .answer-prose h2 { font-size:1.2rem; } .answer-prose h3 { font-size:1.05rem; }
+  .answer-prose ul,.answer-prose ol { margin:0.5em 0 1em 1.4em; }
+  .answer-prose li { margin:0.35em 0; }
+  .answer-prose strong { font-weight: 600; }
+  .answer-prose em { font-style: italic; color: #8b6845; }
+  .answer-prose blockquote { border-left: 3px solid #4d6453; padding: 0.5em 0 0.5em 1.2em; color: #5a6060; margin: 1em 0; font-style: italic; background: rgba(77,100,83,0.03); }
+  .answer-prose code { background: #f2f4f3; padding: 1px 6px; border-radius: 2px; font-family: 'Cascadia Code','Fira Code',monospace; font-size: 0.85em; color: #4d6453; }
+  .answer-prose pre  { background: #f2f4f3; border-radius: 2px; overflow-x: auto; margin: 1em 0; padding: 1em 1.2em; border: 1px solid #dde4e3; }
+  .answer-prose pre code { background: none; padding: 0; font-size: 0.85em; color: inherit; }
+  .answer-prose a { color: #4d6453; text-decoration: underline; text-underline-offset: 2px; }
+  .answer-prose hr { border: none; border-top: 1px solid #dde4e3; margin: 1.5em 0; }
+
+  /* ── Cursor blink ── */
+  .blink-cursor::after {
+    content: '|';
+    display: inline-block;
+    color: #4d6453;
+    animation: blink 1s step-end infinite;
+    margin-left: 1px;
+    font-weight: 300;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── Spinner ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid #4d6453; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
+
+  /* ── Q&A pair divider ── */
+  .qa-pair + .qa-pair { border-top: 1px solid #dde4e3; }
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<!-- Top Navigation -->
+<header id="site-header" class="bg-[#f2f4f3]/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center w-full px-8 md:px-16 py-3 border-b border-outline-variant/10 transition-all duration-300">
+  <a href="/archive/index.html" class="font-headline text-xl font-semibold tracking-tight text-[#2d3433]">The Archivist</a>
+  <nav class="hidden md:flex items-center gap-8 text-sm">
+    <a href="/archive/index.html"    class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Home</a>
+    <a href="/archive/category.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Browse</a>
+    <a href="/archive/search.html"   class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Search</a>
+    <a href="/archive/graph.html"    class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Graph</a>
+    <a href="/archive/ask.html"      class="text-[#4d6453] font-bold border-b-2 border-[#4d6453] pb-0.5">Ask</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <a href="/archive/search.html">
+      <span class="material-symbols-outlined text-[#757c7b] hover:text-primary cursor-pointer transition-colors">search</span>
+    </a>
+  </div>
+</header>
+
+<!-- Page Masthead -->
+<section class="max-w-4xl mx-auto w-full px-8 md:px-16 pt-16 pb-12 border-b border-outline-variant/10">
+  <p class="text-xs uppercase tracking-[0.2em] text-primary mb-5 font-label">Ask the Archive</p>
+  <h1 class="text-4xl md:text-5xl font-headline leading-[1.1] mb-4 text-on-surface">
+    What would you like<br/><em>to know?</em>
+  </h1>
+  <p class="text-base text-on-surface-variant max-w-2xl leading-relaxed">
+    Ask any question — the archive searches your wiki, finds the most relevant pages, and answers using only what's been written here.
+  </p>
+</section>
+
+<!-- Ask Form -->
+<section class="max-w-4xl mx-auto w-full px-8 md:px-16 py-10">
+
+  <!-- Provider + model selector -->
+  <div class="flex items-center gap-3 mb-6 flex-wrap">
+    <span class="text-xs font-bold uppercase tracking-[0.15em] text-[#9c9d9c] font-label">Engine</span>
+    <select id="provider-select" class="text-xs font-label text-on-surface-variant bg-surface-container-low border-0 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer">
+      <option value="ollama">Ollama</option>
+      <option value="claude">Claude</option>
+      <option value="codex">Codex</option>
+    </select>
+    <span class="text-xs font-bold uppercase tracking-[0.15em] text-[#9c9d9c] font-label ml-2">Model</span>
+    <select id="model-select" class="text-xs font-label text-on-surface-variant bg-surface-container-low border-0 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-primary/30 cursor-pointer">
+      <optgroup label="── Local (installed) ──">
+        <option value="qwen2.5:0.5b">qwen2.5:0.5b · local</option>
+        <option value="gemma2:2b">gemma2:2b · local</option>
+        <option value="phi3:mini">phi3:mini (3.8B) · local</option>
+      </optgroup>
+      <optgroup label="── Cloud ──">
+        <option value="glm-5:cloud">glm-5:cloud</option>
+        <option value="kimi-k2.5:cloud">kimi-k2.5:cloud</option>
+        <option value="gemma4:31b-cloud">gemma4:31b-cloud</option>
+        <option value="qwen3.5:397b-cloud">qwen3.5:397b-cloud</option>
+        <option value="deepseek-v3.1:671b-cloud">deepseek-v3.1:671b-cloud</option>
+      </optgroup>
+      <optgroup label="── Other local ──">
+        <option value="glm4">glm4</option>
+        <option value="llama3.1">llama3.1</option>
+        <option value="qwen2.5">qwen2.5</option>
+        <option value="mistral">mistral</option>
+      </optgroup>
+    </select>
+    <div id="ollama-status" class="flex items-center gap-1.5 ml-auto">
+      <div id="status-dot" class="w-2 h-2 rounded-full bg-[#9c9d9c]"></div>
+      <span id="status-text" class="text-xs text-[#9c9d9c] font-label">checking…</span>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="relative">
+    <textarea
+      id="question-input"
+      rows="2"
+      placeholder="e.g. What have I written about atonement? How does my work ethic connect to faith? What is the Kapatid model?"
+    ></textarea>
+    <div class="flex items-center justify-between mt-4 gap-4">
+      <div id="example-chips" class="flex flex-wrap gap-2">
+        <button class="eg-chip text-xs font-label px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container hover:border-primary/20 transition-all duration-200 rounded">What have I written about atonement?</button>
+        <button class="eg-chip text-xs font-label px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container hover:border-primary/20 transition-all duration-200 rounded">How does my design work connect to faith?</button>
+        <button class="eg-chip text-xs font-label px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container hover:border-primary/20 transition-all duration-200 rounded">What is the Kapatid Ministry model?</button>
+        <button class="eg-chip text-xs font-label px-3 py-1.5 bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container hover:border-primary/20 transition-all duration-200 rounded">What themes am I currently exploring?</button>
+      </div>
+      <button
+        id="ask-btn"
+        class="flex items-center gap-2 px-6 py-2.5 bg-primary text-on-primary font-bold text-sm font-label shrink-0 hover:bg-primary-dim transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <span class="material-symbols-outlined text-[18px]">send</span>
+        Ask
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Divider + Results -->
+<section class="max-w-4xl mx-auto w-full px-8 md:px-16 pb-24">
+  <div id="results-container">
+    <!-- Q&A pairs injected here -->
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="w-full mt-auto py-12 px-8 md:px-16 flex flex-col md:flex-row justify-between items-center bg-[#ebeeed]/60 border-t border-[#dde4e3]/20">
+  <p class="font-sans text-xs tracking-wide text-[#5a6060]">© 2025 The Editorial Archivist · Titus Jr. Laxa</p>
+  <p class="text-xs text-[#9c9d9c] mt-3 md:mt-0 font-label">Press <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">/</kbd> to search · <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">G</kbd> for graph · <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">A</kbd> for ask</p>
+</footer>
+
+<script src="data.js"></script>
+<script>
+'use strict';
+
+// ── Page exit transitions ─────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || a.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(() => { window.location.href = href; }, 240);
+});
+
+// ── Header scroll ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); window.location.href = '/archive/search.html'; }
+  if (e.key === 'g' && !e.ctrlKey && !e.metaKey) window.location.href = '/archive/graph.html';
+});
+
+// ── Ollama status check ───────────────────────────────────────────────────────
+async function checkOllamaStatus() {
+  try {
+    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      document.getElementById('status-dot').className  = 'w-2 h-2 rounded-full bg-[#4d9a5d]';
+      document.getElementById('status-text').textContent = 'Ollama online';
+      const data = await r.json();
+      const models = (data.models || []).map(m => m.name);
+      if (models.length) populateModels(models);
+    } else throw new Error();
+  } catch {
+    document.getElementById('status-dot').className  = 'w-2 h-2 rounded-full bg-[#9f403d]';
+    document.getElementById('status-text').textContent = 'Ollama offline';
+  }
+}
+
+const LOCAL_PINNED = ['qwen2.5:0.5b', 'gemma2:2b', 'phi3:mini'];
+const CLOUD_MODELS  = ['glm-5:cloud','kimi-k2.5:cloud','gemma4:31b-cloud','qwen3.5:397b-cloud','deepseek-v3.1:671b-cloud'];
+
+function populateModels(models) {
+  const sel = document.getElementById('model-select');
+  const current = sel.value;
+
+  // "Other local" = whatever Ollama reports minus the pinned three
+  const otherLocal = models
+    .filter(m => !LOCAL_PINNED.includes(m) && !CLOUD_MODELS.includes(m))
+    .sort();
+
+  sel.innerHTML =
+    `<optgroup label="── Local (installed) ──">` +
+      LOCAL_PINNED.map(m => `<option value="${m}"${m===current?' selected':''}>${m === 'phi3:mini' ? 'phi3:mini (3.8B)' : m} · local</option>`).join('') +
+    `</optgroup>` +
+    `<optgroup label="── Cloud ──">` +
+      CLOUD_MODELS.map(m => `<option value="${m}"${m===current?' selected':''}>${m}</option>`).join('') +
+    `</optgroup>` +
+    (otherLocal.length
+      ? `<optgroup label="── Other local ──">` +
+          otherLocal.map(m => `<option value="${m}"${m===current?' selected':''}>${m}</option>`).join('') +
+        `</optgroup>`
+      : '');
+}
+
+async function ensureModelPulled(model) {
+  if (!LOCAL_PINNED.includes(model)) return;
+  try {
+    const tagsRes = await fetch('http://localhost:11434/api/tags');
+    if (!tagsRes.ok) return;
+    const { models } = await tagsRes.json();
+    const installed = (models || []).map(m => m.name);
+    if (installed.some(n => n === model)) return;
+
+    showPullStatus(`⬇ Pulling ${model} — this may take a minute…`);
+    const pullRes = await fetch('http://localhost:11434/api/pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: model, stream: true })
+    });
+    const reader = pullRes.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line);
+          if (obj.status === 'success') showPullStatus(`✓ ${model} ready.`);
+        } catch { /* skip */ }
+      }
+    }
+  } catch (e) {
+    showPullStatus(`⚠ Could not pull ${model}: ${e.message}`);
+  }
+}
+
+function showPullStatus(msg) {
+  let el = document.getElementById('pull-status');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'pull-status';
+    el.className = 'text-xs font-label text-primary ml-2';
+    document.getElementById('ollama-status').after(el);
+  }
+  el.textContent = msg;
+  clearTimeout(el._timer);
+  if (msg.startsWith('✓')) el._timer = setTimeout(() => el.remove(), 4000);
+}
+
+document.getElementById('model-select').addEventListener('change', e => {
+  ensureModelPulled(e.target.value);
+});
+
+const providerSelect = document.getElementById('provider-select');
+const modelSelect = document.getElementById('model-select');
+const CLAUDE_MODELS = [
+  { value: 'default', label: 'Default' },
+  { value: 'sonnet', label: 'Sonnet' },
+  { value: 'opus', label: 'Opus' },
+  { value: 'haiku', label: 'Haiku' }
+];
+let providerCapabilities = {
+  ollama: { available: false, detail: 'Offline' },
+  claude: { available: false, detail: 'Checking' },
+  codex: { available: false, detail: 'Checking' }
+};
+let ollamaModelsCache = [];
+
+function setProviderStatus(state, text) {
+  document.getElementById('status-dot').className = `w-2 h-2 rounded-full ${state === 'online' ? 'bg-[#4d9a5d]' : state === 'warn' ? 'bg-[#c58b2a]' : 'bg-[#9f403d]'}`;
+  document.getElementById('status-text').textContent = text;
+}
+
+function getCurrentProvider() {
+  return providerSelect ? providerSelect.value : 'ollama';
+}
+
+function renderProviderOptions() {
+  if (!providerSelect) return;
+  const current = providerSelect.value || 'ollama';
+  const providers = [
+    { value: 'ollama', label: 'Ollama', capability: providerCapabilities.ollama },
+    { value: 'claude', label: 'Claude', capability: providerCapabilities.claude },
+    { value: 'codex', label: 'Codex', capability: providerCapabilities.codex }
+  ];
+  providerSelect.innerHTML = providers.map(({ value, label, capability }) => {
+    const unavailable = value !== 'ollama' && !capability?.available;
+    const suffix = unavailable ? ` (${capability?.detail || 'Unavailable'})` : '';
+    return `<option value="${value}"${value === current ? ' selected' : ''}>${label}${suffix}</option>`;
+  }).join('');
+}
+
+function updateProviderStatusLabel() {
+  const provider = getCurrentProvider();
+  const capability = providerCapabilities[provider] || { available: false, detail: 'Unavailable' };
+  if (provider === 'ollama') {
+    setProviderStatus(capability.available ? 'online' : 'offline', capability.available ? 'Ollama online' : 'Ollama offline');
+  } else if (provider === 'claude') {
+    setProviderStatus(capability.available ? 'online' : 'offline', capability.available ? 'Claude ready' : `Claude ${String(capability.detail || 'Unavailable').toLowerCase()}`);
+  } else {
+    setProviderStatus(capability.available ? 'online' : 'warn', capability.available ? 'Codex ready' : `Codex ${String(capability.detail || 'Unavailable').toLowerCase()}`);
+  }
+}
+
+populateModels = function(models) {
+  ollamaModelsCache = models || [];
+  if (getCurrentProvider() !== 'ollama') return;
+
+  const current = modelSelect.value;
+  const otherLocal = ollamaModelsCache
+    .filter(m => !LOCAL_PINNED.includes(m) && !CLOUD_MODELS.includes(m))
+    .sort();
+
+  modelSelect.innerHTML =
+    `<optgroup label="Local (installed)">` +
+      LOCAL_PINNED.map(m => `<option value="${m}"${m===current?' selected':''}>${m === 'phi3:mini' ? 'phi3:mini (3.8B)' : m} · local</option>`).join('') +
+    `</optgroup>` +
+    `<optgroup label="Cloud">` +
+      CLOUD_MODELS.map(m => `<option value="${m}"${m===current?' selected':''}>${m}</option>`).join('') +
+    `</optgroup>` +
+    (otherLocal.length
+      ? `<optgroup label="Other local">` +
+          otherLocal.map(m => `<option value="${m}"${m===current?' selected':''}>${m}</option>`).join('') +
+        `</optgroup>`
+      : '');
+};
+
+ensureModelPulled = async function(model) {
+  if (getCurrentProvider() !== 'ollama' || !LOCAL_PINNED.includes(model)) return;
+  try {
+    const tagsRes = await fetch('http://localhost:11434/api/tags');
+    if (!tagsRes.ok) return;
+    const { models } = await tagsRes.json();
+    const installed = (models || []).map(m => m.name);
+    if (installed.some(n => n === model)) return;
+
+    showPullStatus(`Pulling ${model} - this may take a minute...`);
+    const pullRes = await fetch('http://localhost:11434/api/pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: model, stream: true })
+    });
+    const reader = pullRes.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        try {
+          const obj = JSON.parse(line);
+          if (obj.status === 'success') showPullStatus(`${model} ready.`);
+        } catch { /* skip */ }
+      }
+    }
+  } catch (e) {
+    showPullStatus(`Could not pull ${model}: ${e.message}`);
+  }
+};
+
+checkOllamaStatus = async function() {
+  try {
+    const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    providerCapabilities.ollama = { available: true, detail: 'Online' };
+    populateModels((data.models || []).map(m => m.name));
+  } catch {
+    providerCapabilities.ollama = { available: false, detail: 'Offline' };
+  }
+  renderProviderOptions();
+  syncProviderModelOptions();
+};
+
+async function refreshProviderCapabilities() {
+  try {
+    const r = await fetch('/api/ask-capabilities', { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    providerCapabilities = { ...providerCapabilities, ...(data.capabilities || {}) };
+  } catch { /* keep existing fallbacks */ }
+  renderProviderOptions();
+  syncProviderModelOptions();
+}
+
+function syncProviderModelOptions() {
+  const provider = getCurrentProvider();
+  const current = modelSelect.value;
+  if (provider === 'claude') {
+    modelSelect.innerHTML = CLAUDE_MODELS.map(({ value, label }) =>
+      `<option value="${value}"${value===current?' selected':''}>${label}</option>`
+    ).join('');
+  } else if (provider === 'codex') {
+    modelSelect.innerHTML = '<option value="default">Default</option>';
+  } else {
+    populateModels(ollamaModelsCache);
+  }
+  updateProviderStatusLabel();
+}
+
+if (providerSelect) {
+  providerSelect.addEventListener('change', () => {
+    syncProviderModelOptions();
+    ensureModelPulled(modelSelect.value);
+  });
+}
+
+// ── Example chips ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.eg-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById('question-input');
+    input.value = btn.textContent.trim();
+    input.focus();
+    autoResize(input);
+  });
+});
+
+// ── Auto-resize textarea ──────────────────────────────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+}
+const questionInput = document.getElementById('question-input');
+questionInput.addEventListener('input', () => autoResize(questionInput));
+questionInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuestion(); }
+});
+
+// ── Markdown renderer ─────────────────────────────────────────────────────────
+marked.use({ breaks: true, gfm: true });
+
+function renderMarkdown(text) {
+  return marked.parse(text || '');
+}
+
+// ── Slug → title from wiki data ───────────────────────────────────────────────
+function slugToTitle(filePath) {
+  // e.g. "wiki/concepts/atonement.md" → slug "atonement"
+  const slug = filePath.split('/').pop().replace('.md', '');
+  try {
+    const data = window.WIKI_DATA || {};
+    const entry = (data.entries || []).find(e => e.slug === slug);
+    return entry ? entry.title : slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  } catch { return slug; }
+}
+
+// ── Ask ───────────────────────────────────────────────────────────────────────
+let busy = false;
+
+async function submitQuestion() {
+  if (busy) return;
+  const input    = document.getElementById('question-input');
+  const question = input.value.trim();
+  if (!question) return;
+  const provider = getCurrentProvider();
+  const model = document.getElementById('model-select').value;
+
+  busy = true;
+  document.getElementById('ask-btn').disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Build Q&A pair DOM
+  const container = document.getElementById('results-container');
+  const pair = document.createElement('div');
+  pair.className = 'qa-pair py-10';
+
+  // Question row
+  const qRow = document.createElement('div');
+  qRow.className = 'mb-6';
+  qRow.innerHTML = `
+    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-[#9c9d9c] font-label mb-2">Your Question</p>
+    <p class="font-headline text-xl text-on-surface leading-snug">${escHtml(question)}</p>
+  `;
+
+  // Answer row
+  const aRow = document.createElement('div');
+  const labelRow = document.createElement('div');
+  labelRow.className = 'flex items-center gap-2 mb-4';
+  labelRow.innerHTML = `
+    <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-primary font-label">Archive Answer · ${escHtml(provider)}</span>
+    <span id="spinner-${Date.now()}" class="spin"></span>
+  `;
+  const spinnerId = labelRow.querySelector('.spin').id = 'ask-spinner-' + Date.now();
+
+  const answerBody = document.createElement('div');
+  answerBody.className = 'answer-prose blink-cursor';
+
+  const sourcesRow = document.createElement('div');
+  sourcesRow.className = 'mt-5 hidden';
+
+  aRow.appendChild(labelRow);
+  aRow.appendChild(answerBody);
+  aRow.appendChild(sourcesRow);
+
+  pair.appendChild(qRow);
+  pair.appendChild(aRow);
+  container.prepend(pair); // newest first
+
+  // Scroll to pair
+  pair.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // ── Stream from /api/ask ───────────────────────────────────────────────────
+  let fullText = '';
+
+  try {
+    const resp = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, provider, model }),
+    });
+
+    if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+    const reader = resp.body.getReader();
+    const dec    = new TextDecoder();
+    let   buf    = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const ev = JSON.parse(line.slice(6));
+          if (ev.type === 'sources' && ev.sources?.length) {
+            renderSources(sourcesRow, ev.sources);
+          } else if (ev.type === 'token') {
+            fullText += ev.token;
+            answerBody.innerHTML = renderMarkdown(fullText);
+            // keep cursor at end while streaming
+            answerBody.classList.add('blink-cursor');
+          } else if (ev.type === 'done') {
+            // finalize
+            answerBody.classList.remove('blink-cursor');
+            answerBody.innerHTML = renderMarkdown(fullText);
+          } else if (ev.type === 'error') {
+            answerBody.classList.remove('blink-cursor');
+            answerBody.innerHTML = `<p class="text-error text-sm">Error: ${escHtml(ev.error)}</p>`;
+          }
+        } catch { /* skip malformed */ }
+      }
+    }
+  } catch (e) {
+    answerBody.classList.remove('blink-cursor');
+    answerBody.innerHTML = `
+      <p class="text-[#9f403d] text-sm font-label">
+        Could not reach the server. Make sure the wiki server is running at <code>localhost:3333</code>.
+      </p>
+      <p class="text-[#9c9d9c] text-xs mt-1 font-label">${escHtml(e.message)}</p>
+    `;
+  }
+
+  // Remove spinner
+  const spin = document.getElementById(spinnerId);
+  if (spin) spin.remove();
+  if (!fullText) answerBody.classList.remove('blink-cursor');
+
+  busy = false;
+  document.getElementById('ask-btn').disabled = false;
+  document.getElementById('question-input').focus();
+}
+
+function renderSources(container, sources) {
+  if (!sources.length) return;
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-[#9c9d9c] font-label">Sources consulted</span>
+      ${sources.map(src => {
+        const slug  = src.split('/').pop().replace('.md', '');
+        const title = slugToTitle(src);
+        return `<a href="/archive/entry.html?slug=${encodeURIComponent(slug)}"
+          class="inline-flex items-center gap-1 text-xs font-label px-3 py-1 bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-colors duration-200 rounded">
+          <span class="material-symbols-outlined text-[12px]" style="font-size:12px">article</span>
+          ${escHtml(title)}
+        </a>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Ask button ────────────────────────────────────────────────────────────────
+document.getElementById('ask-btn').addEventListener('click', submitQuestion);
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+refreshProviderCapabilities();
+checkOllamaStatus();
+setInterval(() => {
+  refreshProviderCapabilities();
+  checkOllamaStatus();
+}, 30_000);
+syncProviderModelOptions();
+questionInput.focus();
+</script>
+</body>
+</html>

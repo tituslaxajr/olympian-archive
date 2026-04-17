@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Archivist | Entry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error-container": "#fe8983",
+          "on-primary-fixed": "#2f4435",
+          "on-secondary-container": "#4d5356",
+          "surface-container-highest": "#dde4e3",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#adb3b2",
+          "surface-container-high": "#e4e9e8",
+          "primary-container": "#d0e9d4",
+          "primary-fixed-dim": "#c2dbc6",
+          "tertiary": "#575e78",
+          "tertiary-container": "#d5dcfb",
+          "on-tertiary-fixed": "#343b53",
+          "inverse-surface": "#0c0f0e",
+          "tertiary-fixed": "#d5dcfb",
+          "error-dim": "#4e0309",
+          "tertiary-fixed-dim": "#c7ceec",
+          "on-tertiary": "#faf8ff",
+          "secondary-fixed-dim": "#d0d5d9",
+          "secondary-fixed": "#dee3e7",
+          "surface-tint": "#4d6453",
+          "on-tertiary-fixed-variant": "#505771",
+          "secondary": "#5a6063",
+          "surface-dim": "#d4dcda",
+          "on-surface": "#2d3433",
+          "on-primary": "#e5fee8",
+          "background": "#f9f9f8",
+          "surface-bright": "#f9f9f8",
+          "on-secondary-fixed-variant": "#565c5f",
+          "on-primary-fixed-variant": "#4a6150",
+          "primary-fixed": "#d0e9d4",
+          "error": "#9f403d",
+          "primary": "#4d6453",
+          "primary-dim": "#415847",
+          "on-error": "#fff7f6",
+          "on-surface-variant": "#5a6060",
+          "secondary-container": "#dee3e7",
+          "secondary-dim": "#4e5457",
+          "on-secondary-fixed": "#3a4043",
+          "surface": "#f9f9f8",
+          "on-tertiary-container": "#474d67",
+          "on-secondary": "#f4fafd",
+          "on-background": "#2d3433",
+          "on-error-container": "#752121",
+          "surface-container-low": "#f2f4f3",
+          "surface-variant": "#dde4e3",
+          "on-primary-container": "#415747",
+          "outline": "#757c7b",
+          "tertiary-dim": "#4b526c",
+          "inverse-primary": "#e3fde7",
+          "surface-container": "#ebeeed",
+          "inverse-on-surface": "#9c9d9c"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "fontFamily": {
+          "headline": ["Playfair Display", "serif"],
+          "body": ["DM Sans", "sans-serif"],
+          "label": ["DM Sans", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { font-family: 'DM Sans', sans-serif; }
+  h1, h2, h3, h4, .font-headline { font-family: 'Playfair Display', serif; }
+  h1 em, h2 em, h3 em { font-style: italic; font-weight: inherit; }
+
+  /* Reading progress bar */
+  #reading-progress { position:fixed; top:0; left:0; height:2px; background:#4d6453; width:0%; transition:width 0.08s linear; z-index:200; }
+
+  /* Page transitions */
+  @keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pageOut { to { opacity:0; transform:translateY(-8px); } }
+  body { animation: pageIn 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+  body.page-exit { animation: pageOut 0.25s ease forwards !important; }
+
+  /* Scroll reveals */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* Nav underline slide */
+  .nav-link { position:relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:currentColor; transition:width 0.25s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer { from { background-position:-600px 0; } to { background-position:600px 0; } }
+  .skeleton { background:linear-gradient(90deg,#dde4e3 25%,#f2f4f3 50%,#dde4e3 75%); background-size:1200px 100%; animation:shimmer 1.5s infinite linear; border-radius:2px; min-height:1em; }
+
+  /* Article body typography */
+  #entry-body { font-size: 1.0625rem; line-height: 1.85; color: #5a6060; }
+  #entry-body h2, #entry-body h3 { font-family: 'Playfair Display', serif; color: #2d3433; margin-top: 3.5rem; margin-bottom: 1.25rem; }
+  #entry-body h2 { font-size: 1.875rem; }
+  #entry-body h3 { font-size: 1.375rem; }
+  #entry-body p { margin-bottom: 1.5rem; }
+  #entry-body em { font-style: italic; }
+  #entry-body strong { font-weight: 600; color: #2d3433; }
+  #entry-body blockquote { border-left: 2px solid #d0e9d4; padding: 0.5rem 0 0.5rem 2rem; margin: 3rem 0; font-family: 'Playfair Display', serif; font-size: 1.25rem; font-style: italic; color: #415847; }
+  #entry-body a { color: #4d6453; text-decoration: underline; text-decoration-color: rgba(77,100,83,0.3); text-underline-offset: 4px; transition: text-decoration-color 0.2s; }
+  #entry-body a:hover { text-decoration-color: #4d6453; }
+  #entry-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+  #entry-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+  #entry-body li { margin-bottom: 0.5rem; line-height: 1.75; }
+  #entry-body hr { border: none; border-top: 1px solid rgba(173,179,178,0.2); margin: 3rem 0; }
+  #entry-body pre { background: #f2f4f3; padding: 1.5rem; margin: 2rem 0; overflow-x: auto; font-size: 0.875rem; }
+  #entry-body code { font-family: monospace; font-size: 0.875em; }
+
+  /* Drop cap */
+  #entry-body > p:first-of-type::first-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 4.5rem;
+    font-weight: 500;
+    line-height: 0.85;
+    float: left;
+    margin-right: 0.1em;
+    margin-top: 0.08em;
+    color: #4d6453;
+  }
+
+  /* Sticky TOC active */
+  .toc-active { color: #415847 !important; border-left-color: #4d6453 !important; }
+
+  /* Header scroll */
+  header.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+
+  /* ── Visual enhancements ───────────────────────────────────────── */
+
+  /* WikiLink inline chips */
+  .wikilink {
+    display: inline-flex; align-items: center; gap: 2px;
+    padding: 1px 7px 1px 5px;
+    background: rgba(77,100,83,0.07);
+    border: 1px solid rgba(77,100,83,0.18);
+    border-radius: 3px;
+    font-size: 0.875em; font-weight: 500; color: #4d6453;
+    text-decoration: none; vertical-align: middle; line-height: 1.6;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .wikilink:hover { background: rgba(77,100,83,0.14); border-color: rgba(77,100,83,0.35); }
+  .wikilink .wl-icon { font-size: 13px !important; opacity: 0.55; }
+
+  /* Lede — definition paragraph */
+  #entry-body p.lede {
+    font-family: 'Playfair Display', serif; font-size: 1.175rem;
+    line-height: 1.75; color: #2d3433; font-style: italic;
+    background: linear-gradient(135deg, rgba(208,233,212,0.35) 0%, rgba(242,244,243,0.5) 100%);
+    border-left: 3px solid #4d6453;
+    padding: 1.125rem 1.5rem; margin-bottom: 2.5rem;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* Section dot divider */
+  .section-dots { display:flex; align-items:center; justify-content:center; gap:6px; margin:2.75rem 0; }
+  .section-dots span { display:inline-block; width:4px; height:4px; border-radius:50%; background:#c4cac9; }
+  .section-dots span:nth-child(2) { background:#9c9d9c; }
+
+  /* Enhanced blockquote — decorative opening mark */
+  #entry-body blockquote { position:relative; overflow:visible; }
+  #entry-body blockquote::before {
+    content:'\201C'; position:absolute; left:0.75rem; top:-1.75rem;
+    font-size:5rem; line-height:1; color:rgba(77,100,83,0.1);
+    font-family:'Playfair Display',serif; pointer-events:none; user-select:none;
+  }
+
+  /* Source entry cards */
+  .sources-grid { display:grid; gap:0.5rem; margin:0.875rem 0 2rem; }
+  .source-entry {
+    display:flex; align-items:center; gap:0.75rem;
+    padding:0.75rem 1rem; background:#f2f4f3;
+    text-decoration:none; font-size:0.875rem; font-weight:500; color:#2d3433;
+    border-left:2px solid transparent;
+    transition:background 0.18s, border-color 0.18s;
+  }
+  .source-entry:hover { background:#d0e9d4; border-left-color:#4d6453; color:#415847; }
+  .source-entry .src-icon { color:#4d6453; font-size:1rem !important; flex-shrink:0; }
+  .source-entry .src-arrow { color:#adb3b2; font-size:1rem !important; margin-left:auto; flex-shrink:0; }
+
+  /* Connection chips */
+  .connections-chips { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.875rem 0 1.75rem; }
+  .connection-chip {
+    display:inline-flex; align-items:center; gap:0.3rem;
+    padding:0.35rem 0.875rem; background:#f2f4f3; color:#4d6453;
+    text-decoration:none; font-size:0.8rem; font-weight:600; letter-spacing:0.025em;
+    border:1px solid rgba(77,100,83,0.18); border-radius:2px;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .connection-chip:hover { background:#d0e9d4; border-color:#4d6453; }
+  .connection-chip .chip-icon { font-size:0.75rem !important; opacity:0.65; }
+
+  /* Entry stats bar */
+  .entry-stats-bar {
+    display:flex; flex-wrap:wrap; gap:2rem;
+    padding:1rem 0; margin-bottom:3rem;
+    border-top:1px solid rgba(173,179,178,0.2);
+    border-bottom:1px solid rgba(173,179,178,0.2);
+  }
+  .stat-item { display:flex; flex-direction:column; gap:0.15rem; }
+  .stat-label { font-size:0.6875rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#9c9d9c; }
+  .stat-value { font-size:0.9375rem; font-weight:600; color:#2d3433; font-family:'Playfair Display',serif; }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+
+<!-- Reading progress bar -->
+<div id="reading-progress"></div>
+
+<!-- Top Navigation -->
+<header id="site-header" class="bg-[#f2f4f3]/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center w-full px-8 md:px-16 py-3 border-b border-outline-variant/10 transition-all duration-300">
+  <a href="/archive/index.html" class="font-headline text-xl font-semibold tracking-tight text-[#2d3433]">The Archivist</a>
+  <nav class="hidden md:flex items-center gap-8 text-sm">
+    <a href="/archive/index.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Home</a>
+    <a href="/archive/category.html" class="text-[#4d6453] font-bold border-b-2 border-[#4d6453] pb-0.5">Browse</a>
+    <a href="/archive/search.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Search</a>
+    <a href="/archive/graph.html" class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Graph</a>
+    <a href="/archive/ask.html"   class="nav-link text-[#757c7b] font-medium hover:text-[#4d6453] transition-colors duration-200">Ask</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <a href="/archive/search.html">
+      <span class="material-symbols-outlined text-[#757c7b] hover:text-primary cursor-pointer transition-colors">search</span>
+    </a>
+  </div>
+</header>
+
+<main class="flex-1 bg-surface min-h-screen">
+  <div class="max-w-5xl mx-auto px-8 py-12 md:px-12 md:py-20 lg:flex gap-16">
+
+    <!-- Article Body -->
+    <article class="flex-1 max-w-prose">
+
+      <!-- Breadcrumbs -->
+      <nav class="flex items-center gap-2 text-xs font-medium text-[#757c7b] mb-8 tracking-wider uppercase reveal">
+        <a href="/archive/index.html" class="hover:text-primary transition-colors">Library</a>
+        <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+        <a id="entry-domain-link" href="/archive/category.html" class="hover:text-primary transition-colors">Domain</a>
+        <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+        <span id="entry-breadcrumb-title" class="text-[#2d3433]">Loading…</span>
+      </nav>
+
+      <!-- Article Header -->
+      <header class="mb-12 reveal" style="transition-delay:80ms">
+        <h1 id="entry-title" class="text-5xl md:text-6xl font-headline text-on-surface leading-tight mb-6">
+          <span class="skeleton inline-block w-3/4 h-14">&nbsp;</span>
+        </h1>
+        <div class="flex items-center gap-4 text-sm text-[#757c7b] mb-10 flex-wrap">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary text-sm">person</span>
+            </div>
+            <span id="entry-author" class="font-medium text-on-surface">Titus Jr. Laxa</span>
+          </div>
+          <span class="w-1 h-1 bg-[#adb3b2] rounded-full"></span>
+          <time id="entry-date">—</time>
+          <span class="w-1 h-1 bg-[#adb3b2] rounded-full"></span>
+          <span id="entry-readtime">— min read</span>
+        </div>
+        <!-- Hero image placeholder -->
+        <div id="entry-hero" class="w-full aspect-[21/9] bg-[#f2f4f3] mb-12 overflow-hidden">
+          <div class="skeleton w-full h-full"></div>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <div id="entry-body" class="reveal" style="transition-delay:160ms">
+        <div class="space-y-4">
+          <div class="skeleton h-5 w-full"></div>
+          <div class="skeleton h-5 w-11/12"></div>
+          <div class="skeleton h-5 w-4/5"></div>
+          <div class="skeleton h-5 w-full mt-6"></div>
+          <div class="skeleton h-5 w-3/4"></div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <footer class="mt-20 pt-12 border-t border-[#dde4e3]/50">
+        <div id="entry-tags" class="flex flex-wrap gap-2 mb-12 reveal"></div>
+        <!-- Related Entries -->
+        <div class="reveal" style="transition-delay:80ms">
+          <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-[#9c9d9c] mb-6">Continue Reading</h4>
+          <div id="entry-related" class="space-y-4">
+            <div class="skeleton h-16 w-full"></div>
+            <div class="skeleton h-16 w-full"></div>
+          </div>
+        </div>
+      </footer>
+    </article>
+
+    <!-- Scholarly Sidebar -->
+    <aside class="hidden lg:block w-64 sticky top-32 self-start shrink-0">
+      <div class="bg-surface-container-lowest/70 backdrop-blur-md p-8 border border-[#dde4e3]/20 reveal">
+        <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-[#9c9d9c] mb-6">Outline</h4>
+        <nav id="sidebar-toc" class="space-y-4">
+          <div><a class="block text-sm text-[#4d6453] border-l-2 border-[#4d6453] pl-4 py-1" href="#">Top</a></div>
+        </nav>
+
+        <!-- Metadata -->
+        <div class="mt-12 pt-8 border-t border-[#f2f4f3]">
+          <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-[#9c9d9c] mb-4">Metadata</h4>
+          <div class="space-y-3">
+            <div class="flex justify-between text-xs">
+              <span class="text-[#9c9d9c]">Domain</span>
+              <a id="meta-domain-link" href="/archive/category.html" class="text-primary font-medium hover:underline">—</a>
+            </div>
+            <div class="flex justify-between text-xs">
+              <span class="text-[#9c9d9c]">Type</span>
+              <span id="meta-type" class="text-on-surface font-medium">—</span>
+            </div>
+            <div class="flex justify-between text-xs">
+              <span class="text-[#9c9d9c]">Published</span>
+              <span id="meta-date" class="text-on-surface font-medium">—</span>
+            </div>
+            <div class="flex justify-between text-xs">
+              <span class="text-[#9c9d9c]">Words</span>
+              <span id="meta-words" class="text-on-surface font-medium">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Taxonomy chips -->
+        <div class="mt-8 pt-6 border-t border-[#f2f4f3]">
+          <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-[#9c9d9c] mb-3">Taxonomy</h4>
+          <div id="sidebar-taxonomy" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Backlinks -->
+        <div class="mt-8 pt-6 border-t border-[#f2f4f3]">
+          <h4 class="text-xs font-bold tracking-[0.1rem] uppercase text-[#9c9d9c] mb-3">Cited By</h4>
+          <div id="sidebar-backlinks" class="space-y-2">
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-[#ebeeed]/60 w-full mt-auto py-12 px-8 md:px-16 flex flex-col md:flex-row justify-between items-center border-t border-[#dde4e3]/20">
+  <p class="font-sans text-xs tracking-wide text-[#5a6060]">© 2025 The Editorial Archivist · Titus Jr. Laxa</p>
+  <p class="text-xs text-[#9c9d9c] mt-3 md:mt-0 font-label">Press <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">/</kbd> to search · <kbd class="px-1.5 py-0.5 bg-[#f2f4f3] rounded text-[#757c7b] font-mono text-[10px]">G</kbd> for graph</p>
+</footer>
+
+<script src="data.js"></script>
+<script>
+// ── Reading progress ──────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
+  document.getElementById('reading-progress').style.width = (pct * 100) + '%';
+}, { passive: true });
+
+// ── Header scroll ─────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// ── Page exit transition ──────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || a.target === '_blank') return;
+  e.preventDefault();
+  document.body.classList.add('page-exit');
+  setTimeout(() => { window.location.href = href; }, 240);
+});
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); window.location.href = '/archive/search.html'; }
+  if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey) window.location.href = '/archive/graph.html';
+  if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) window.location.href = '/archive/ask.html';
+});
+
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
+function initRevealObserver() {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); } });
+  }, { threshold: 0 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+}
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+const DOMAIN_GRADIENTS = {
+  faith:    ['#2f4435','#4d6453'],
+  ministry: ['#1a3328','#2d6a4f'],
+  work:     ['#374151','#6b7280'],
+  culture:  ['#3a4030','#4d6453'],
+  general:  ['#5a6060','#757c7b'],
+};
+function entryVisualHTML(entry, cls='') {
+  const dom = entry?.domain || 'general';
+  const [c1,c2] = DOMAIN_GRADIENTS[dom] || DOMAIN_GRADIENTS.general;
+  const gradient = `linear-gradient(135deg,${c1} 0%,${c2} 100%)`;
+  const initial = (entry?.title||'?').charAt(0).toUpperCase();
+  if (entry?.coverImage) {
+    return `<img src="${entry.coverImage}" alt="${entry?.title||''}" class="${cls}" onerror="this.parentElement.style.background='${gradient}';this.remove();" />`;
+  }
+  return `<div class="w-full h-full flex items-center justify-center ${cls}" style="background:${gradient}"><span style="font-family:'Playfair Display',serif;font-size:5rem;color:rgba(255,255,255,0.2);font-weight:300;">${initial}</span></div>`;
+}
+
+// ── Data loader ───────────────────────────────────────────────────────────────
+async function loadWikiData() {
+  try {
+    const r = await fetch('/api/entries', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) return await r.json();
+  } catch {}
+  return window.WIKI_DATA || { entries:[], topTags:[], stats:{} };
+}
+
+// ── Custom marked renderer (matches build.js styles) ─────────────────────────
+function buildRenderer() {
+  const sizes = { 1:'text-4xl md:text-5xl', 2:'text-3xl', 3:'text-xl', 4:'text-lg' };
+  return {
+    heading({ text, depth } = {}) {
+      const safeText = text || '';
+      const id = safeText.replace(/<[^>]*>/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const cls = sizes[depth] || 'text-base';
+      const mg  = depth <= 2 ? 'mt-16 mb-6' : 'mt-10 mb-4';
+      return `<h${depth} id="${id}" class="${cls} font-headline text-on-surface ${mg}">${safeText}</h${depth}>\n`;
+    },
+    paragraph({ text } = {}) { return `<p class="mb-6 leading-relaxed text-on-surface-variant">${text || ''}</p>\n`; },
+    blockquote({ text } = {}) {
+      const inner = String(text || '').replace(/^<p[^>]*>/,'').replace(/<\/p>\s*$/,'');
+      return `<blockquote class="pl-8 border-l-2 border-primary-container italic text-xl font-headline text-on-primary-container py-2 my-12">${inner}</blockquote>\n`;
+    },
+    strong({ text } = {}) { return `<strong class="text-on-surface font-semibold">${text || ''}</strong>`; },
+    em({ text } = {})     { return `<em>${text || ''}</em>`; },
+    link({ href, text } = {}) {
+      if (href && href.includes('entry.html?slug=')) {
+        return `<a href="${href}" class="wikilink"><span class="material-symbols-outlined wl-icon">article</span>${text || ''}</a>`;
+      }
+      return `<a href="${href || '#'}" class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary transition-all">${text || ''}</a>`;
+    },
+    hr()   { return `<hr class="my-12 border-0 border-t border-outline-variant/20">\n`; },
+    code({ text } = {})  { return `<pre class="bg-surface-container-low p-6 my-8 overflow-x-auto text-sm font-mono text-on-surface-variant"><code>${text || ''}</code></pre>\n`; },
+    image({ href, title, text } = {}) {
+      return `<figure class="my-12"><img src="${href || ''}" alt="${text || ''}" class="w-full object-cover" />${title?`<figcaption class="mt-3 text-xs text-[#9c9d9c] italic text-center">${title}</figcaption>`:''}</figure>\n`;
+    },
+  };
+}
+
+// ── Post-process rendered body DOM ───────────────────────────────────────────
+function postProcessBody(bodyEl) {
+  // 1. First <p> → styled lede/definition
+  const firstP = bodyEl.querySelector('p');
+  if (firstP) firstP.classList.add('lede');
+
+  // 2. <hr> → decorative three-dot dividers
+  bodyEl.querySelectorAll('hr').forEach(hr => {
+    const div = document.createElement('div');
+    div.className = 'section-dots';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    hr.replaceWith(div);
+  });
+
+  // 3. Process h2 sections: Sources → cards, Connections → chips
+  bodyEl.querySelectorAll('h2').forEach(h2 => {
+    const label = h2.textContent.trim().toLowerCase();
+    const next = h2.nextElementSibling;
+    if (!next || next.tagName !== 'UL') return;
+
+    if (label === 'sources') {
+      const links = Array.from(next.querySelectorAll('a'));
+      if (!links.length) return;
+      const grid = document.createElement('div');
+      grid.className = 'sources-grid';
+      links.forEach(a => {
+        const card = document.createElement('a');
+        card.href = a.href;
+        card.className = 'source-entry';
+        card.innerHTML = `<span class="material-symbols-outlined src-icon">auto_stories</span><span>${a.textContent}</span><span class="material-symbols-outlined src-arrow">arrow_right_alt</span>`;
+        grid.appendChild(card);
+      });
+      next.replaceWith(grid);
+    }
+
+    if (label === 'connections') {
+      const links = Array.from(next.querySelectorAll('a'));
+      if (!links.length) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'connections-chips';
+      links.forEach(a => {
+        const chip = document.createElement('a');
+        chip.href = a.href;
+        chip.className = 'connection-chip';
+        chip.innerHTML = `<span class="material-symbols-outlined chip-icon">link</span>${a.textContent}`;
+        wrap.appendChild(chip);
+      });
+      next.replaceWith(wrap);
+    }
+  });
+}
+
+// ── Fetch raw markdown content ────────────────────────────────────────────────
+async function fetchMarkdown(slug) {
+  const subdirs = ['resources','concepts','areas','people','projects','lenses','lenses/features'];
+  for (const sub of subdirs) {
+    try {
+      const r = await fetch(`/api/file?path=wiki/${sub}/${slug}.md`, { signal: AbortSignal.timeout(2000) });
+      if (r.ok) { const d = await r.json(); return d.content || null; }
+    } catch {}
+  }
+  return null;
+}
+
+// ── Global markdown pre-processor ────────────────────────────────────────────
+function preprocessMd(text) {
+  return text
+    .replace(/^\*\*([^*\n]+?)\*\*(\s*\([^)\n]+\))?\s*$/gm,
+      (_, content, citation) => `#### ${content}${citation || ''}`)
+    .replace(/^\*\*([^*\n]+?:)\*\*\s+(.+)$/gm,
+      (_, label, value) => `- **${label}** ${value}`);
+}
+
+// ── Render markdown to HTML ───────────────────────────────────────────────────
+function renderMarkdown(raw) {
+  if (!window.marked) return `<p>${raw.replace(/\n/g,'<br/>')}</p>`;
+  // Strip YAML frontmatter before rendering
+  const stripped = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+  let src = preprocessMd(stripped);
+  src = src.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, target, alias) => {
+    const slug = target.trim().toLowerCase().replace(/\s+/g,'-');
+    const label = (alias||target).trim();
+    return `<a href="entry.html?slug=${slug}" class="text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary transition-all">${label}</a>`;
+  });
+  marked.use({ renderer: buildRenderer(), gfm: true, breaks: false });
+  return marked.parse(src);
+}
+
+// ── Sticky TOC scroll spy ─────────────────────────────────────────────────────
+function initTOCSpy() {
+  const links = document.querySelectorAll('#sidebar-toc a');
+  if (!links.length) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('toc-active','text-[#4d6453]','border-l-2','border-[#4d6453]'));
+        const active = document.querySelector(`#sidebar-toc a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('toc-active','text-[#4d6453]','border-l-2','border-[#4d6453]');
+      }
+    });
+  }, { rootMargin:'-20% 0px -70% 0px' });
+  document.querySelectorAll('#entry-body h2, #entry-body h3').forEach(h => { if (h.id) io.observe(h); });
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+(async function() {
+  const params = new URLSearchParams(window.location.search);
+  const slug   = params.get('slug');
+
+  const data    = await loadWikiData();
+  const entries = data.entries || [];
+  const entry   = slug ? entries.find(e => e.slug === slug) : entries[0];
+
+  if (!entry) {
+    document.getElementById('entry-title').textContent = 'Entry not found';
+    initRevealObserver();
+    return;
+  }
+
+  // ── Page title
+  document.title = `The Archivist | ${entry.title}`;
+
+  // ── Breadcrumb
+  const bcTitle  = document.getElementById('entry-breadcrumb-title');
+  const bcDomain = document.getElementById('entry-domain-link');
+  if (bcTitle)  bcTitle.textContent = entry.title;
+  if (bcDomain) { bcDomain.textContent = cap(entry.domain); bcDomain.href = `/archive/category.html?domain=${entry.domain}`; }
+
+  // ── Article header
+  const titleEl  = document.getElementById('entry-title');
+  const dateEl   = document.getElementById('entry-date');
+  const readEl   = document.getElementById('entry-readtime');
+  const authorEl = document.getElementById('entry-author');
+  if (titleEl)  titleEl.textContent  = entry.title;
+  if (dateEl)   dateEl.textContent   = fmtDate(entry.created);
+  if (readEl)   readEl.textContent   = `${entry.readTime} min read`;
+  if (authorEl) authorEl.textContent = entry.author || 'Titus Jr. Laxa';
+
+  // ── Hero image
+  const heroEl = document.getElementById('entry-hero');
+  if (heroEl) {
+    heroEl.innerHTML = entryVisualHTML(entry, 'w-full h-full object-cover opacity-80');
+  }
+
+  // ── Stats bar (between hero and body)
+  const bodyEl = document.getElementById('entry-body');
+  if (bodyEl) {
+    const statsBar = document.createElement('div');
+    statsBar.className = 'entry-stats-bar reveal';
+    statsBar.style.transitionDelay = '120ms';
+    const statItems = [
+      { label: 'Type',    value: cap(entry.type) },
+      { label: 'Domain',  value: cap(entry.domain) },
+      ...(entry.sources > 0 ? [{ label: 'Sources', value: entry.sources }] : []),
+      { label: 'Words',   value: entry.wordCount ? entry.wordCount.toLocaleString() : '—' },
+    ];
+    statsBar.innerHTML = statItems.map(s =>
+      `<div class="stat-item"><span class="stat-label">${s.label}</span><span class="stat-value">${s.value}</span></div>`
+    ).join('');
+    bodyEl.parentNode.insertBefore(statsBar, bodyEl);
+  }
+
+  // ── Article body
+  if (bodyEl) {
+    const rawMd = await fetchMarkdown(entry.slug);
+    if (rawMd) {
+      bodyEl.innerHTML = renderMarkdown(rawMd);
+    } else if (entry.htmlContent) {
+      bodyEl.innerHTML = entry.htmlContent;
+    } else {
+      bodyEl.innerHTML = `<p class="text-on-surface-variant italic">Content preview not available. Open this entry in the main wiki viewer to read it.</p>`;
+    }
+    postProcessBody(bodyEl);
+  }
+
+  // ── Tags
+  const tagsEl = document.getElementById('entry-tags');
+  if (tagsEl && entry.tags.length) {
+    tagsEl.innerHTML = entry.tags.map(t =>
+      `<a href="/archive/search.html?q=${encodeURIComponent(t)}" class="bg-surface-container-high px-3 py-1 text-xs font-medium tracking-wide rounded-md text-[#5a6060] hover:bg-primary-container transition-colors">${t.toUpperCase()}</a>`
+    ).join('');
+  }
+
+  // ── Related entries
+  const relatedEl = document.getElementById('entry-related');
+  if (relatedEl) {
+    const sharedTag = new Set(entry.tags);
+    const related   = entries.filter(e => e.slug !== entry.slug && e.tags.some(t => sharedTag.has(t))).slice(0, 3);
+    relatedEl.innerHTML = related.length ? related.map(e => `
+      <a href="/archive/entry.html?slug=${e.slug}" class="group flex items-center gap-4 p-4 bg-surface-container-lowest hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined text-primary">auto_stories</span>
+        <div>
+          <p class="text-sm font-headline group-hover:text-primary transition-colors">${e.title}</p>
+          <p class="text-xs text-[#9c9d9c]">${cap(e.domain)} · ${e.tags.slice(0,2).map(cap).join(' · ')}</p>
+        </div>
+        <span class="material-symbols-outlined text-[#adb3b2] group-hover:text-primary ml-auto transition-colors">arrow_right_alt</span>
+      </a>`).join('') : '<p class="text-sm text-[#9c9d9c] italic">No related entries found.</p>';
+  }
+
+  // ── Sidebar TOC
+  const tocEl = document.getElementById('sidebar-toc');
+  if (tocEl) {
+    const headings = bodyEl ? Array.from(bodyEl.querySelectorAll('h2,h3')) : [];
+    const topLink  = `<div><a class="block text-sm text-[#4d6453] border-l-2 border-[#4d6453] pl-4 py-1" href="#">Top</a></div>`;
+    const hLinks   = headings.map(h => {
+      const indent = h.tagName === 'H3' ? 'pl-8 text-xs text-[#9c9d9c]' : 'pl-4 text-sm text-[#757c7b]';
+      return `<div><a class="block ${indent} hover:text-[#4d6453] transition-colors py-1" href="#${h.id}">${h.textContent}</a></div>`;
+    }).join('');
+    tocEl.innerHTML = topLink + hLinks;
+    setTimeout(initTOCSpy, 300);
+  }
+
+  // ── Sidebar metadata
+  const metaDom  = document.getElementById('meta-domain-link');
+  const metaType = document.getElementById('meta-type');
+  const metaDate = document.getElementById('meta-date');
+  const metaWords= document.getElementById('meta-words');
+  if (metaDom)   { metaDom.textContent = cap(entry.domain); metaDom.href = `/archive/category.html?domain=${entry.domain}`; }
+  if (metaType)  metaType.textContent = cap(entry.type);
+  if (metaDate)  metaDate.textContent = fmtDateShort(entry.created);
+  if (metaWords) metaWords.textContent = entry.wordCount ? `${entry.wordCount.toLocaleString()} words` : '—';
+
+  // ── Sidebar taxonomy
+  const taxEl = document.getElementById('sidebar-taxonomy');
+  if (taxEl && entry.tags.length) {
+    taxEl.innerHTML = entry.tags.slice(0, 8).map((t, i) => {
+      const cls = i === 0
+        ? 'px-2 py-1 bg-primary-container rounded-md text-[10px] font-label text-on-primary-container cursor-pointer transition-colors'
+        : 'px-2 py-1 bg-surface-container-high rounded-md text-[10px] font-label text-on-surface-variant hover:bg-primary-container hover:text-on-primary-container cursor-pointer transition-colors';
+      return `<a href="/archive/search.html?q=${encodeURIComponent(t)}" class="${cls}">${cap(t)}</a>`;
+    }).join('');
+  }
+
+  // ── Backlinks (live API)
+  const backlinksEl = document.getElementById('sidebar-backlinks');
+  if (backlinksEl && entry.slug) {
+    try {
+      const r = await fetch(`/api/backlinks?name=${encodeURIComponent(entry.slug)}`, { signal: AbortSignal.timeout(2000) });
+      if (r.ok) {
+        const { backlinks } = await r.json();
+        if (backlinks && backlinks.length) {
+          backlinksEl.innerHTML = backlinks.slice(0, 6).map(p => {
+            const name = p.replace(/^.*[/\\]/,'').replace(/\.md$/,'');
+            const sl   = name.toLowerCase().replace(/\s+/g,'-');
+            return `<a href="/archive/entry.html?slug=${sl}" class="block text-xs text-primary hover:underline py-0.5">${name}</a>`;
+          }).join('');
+        } else {
+          backlinksEl.innerHTML = '<p class="text-xs text-[#9c9d9c] italic">No citations yet.</p>';
+        }
+      } else {
+        backlinksEl.innerHTML = '<p class="text-xs text-[#9c9d9c] italic">—</p>';
+      }
+    } catch {
+      backlinksEl.innerHTML = '<p class="text-xs text-[#9c9d9c] italic">—</p>';
+    }
+  }
+
+  initRevealObserver();
+})();
+</script>
+</body>
+</html>
